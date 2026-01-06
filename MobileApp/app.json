@@ -2,7 +2,7 @@
   "expo": {
     "name": "Bit2Kwacha",
     "slug": "bit2kwacha-mobile",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -24,8 +24,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#F7931A"
       },
-      "package": "com.bit2kwacha.mobile",
-      "usesCleartextTraffic": true
+      "package": "com.bit2kwacha.mobile"
     },
     "plugins": [
       [
@@ -38,11 +37,16 @@
             }
           }
         }
-      ]
+      ],
+      "expo-font"
     ],
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "4a1ee261-d03f-45bc-a9c7-3128d46b9886"
+      }
     }
   }
 }
-

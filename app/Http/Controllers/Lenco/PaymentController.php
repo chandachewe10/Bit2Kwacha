@@ -18,55 +18,55 @@ class PaymentController extends Controller
             // For mobile app, accept data directly from request body
             // For web, use session data or request data
             $amount = (float) ($request->input('amount') ?? $request->input('amount_kwacha', 0));
-            $paymentData = $request->has('payment_data') 
-                ? (is_array($request->input('payment_data')) 
-                    ? $request->input('payment_data') 
+            $paymentData = $request->has('payment_data')
+                ? (is_array($request->input('payment_data'))
+                    ? $request->input('payment_data')
                     : json_decode($request->input('payment_data'), true))
                 : [];
             $reference = 'ref-' . now()->timestamp;
 
             // Get session data for additional fields (web requests)
             $sessionData = session()->get('pending_transaction_data', []);
-            
+
             // For mobile app, get data from request body; for web, use session or payment data
-            $customerEmail = $request->input('email') 
-                ?? $paymentData['customer']['email'] 
-                ?? $sessionData['email'] 
+            $customerEmail = $request->input('email')
+                ?? $paymentData['customer']['email']
+                ?? $sessionData['email']
                 ?? 'customer@bitkwik.com';
-            $customerName = $request->input('name') 
-                ?? $paymentData['customer']['firstName'] 
-                ?? $sessionData['name'] 
+            $customerName = $request->input('name')
+                ?? $paymentData['customer']['firstName']
+                ?? $sessionData['name']
                 ?? 'Customer';
-            $phone = $request->input('phone') 
-                ?? $paymentData['customer']['phone'] 
-                ?? $sessionData['phone'] 
+            $phone = $request->input('phone')
+                ?? $paymentData['customer']['phone']
+                ?? $sessionData['phone']
                 ?? '';
-            
+
             // Get amounts from request (mobile app) or session (web)
             $amountSats = $request->input('amount_sats') ?? $sessionData['amount_sats'] ?? null;
             $amountBtc = $request->input('amount_btc') ?? $sessionData['amount_btc'] ?? null;
-            
+
             // Calculate convenience_fee: use from request, session, or calculate as 8% of amount
-            $convenienceFee = $request->input('conversion_fee') 
+            $convenienceFee = $request->input('conversion_fee')
                 ?? $request->input('convenience_fee')
-                ?? $sessionData['conversion_fee'] 
+                ?? $sessionData['conversion_fee']
                 ?? ($amount * 0.08);
-            $networkFee = $request->input('network_fee') 
-                ?? $sessionData['network_fee'] 
+            $networkFee = $request->input('network_fee')
+                ?? $sessionData['network_fee']
                 ?? 5; // Default network fee is 5 ZMW
 
-            
+
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . config('services.opennode.api_key_withdrawal'),
                 'Content-Type' => 'application/json',
             ])->post(config('services.opennode.base_uri_withdrawal') . '/lnurl-withdrawal', [
-                "min_amt"      => 50,
-                "max_amt"      => (int) ($amountSats ?? 0),
-                "callback_url" => config('services.opennode.withdrawal'),
-                "external_id"  => $reference,
-                "expiry_date"  => time() + (10 * 60), // 10 minutes
-                "description"  => "Mobile to Bitcoin Transaction for " . $customerEmail,
-            ]);
+                        "min_amt" => 50,
+                        "max_amt" => (int) ($amountSats ?? 0),
+                        "callback_url" => config('services.opennode.withdrawal'),
+                        "external_id" => $reference,
+                        "expiry_date" => time() + (30 * 60), // 30 minutes
+                        "description" => "Mobile to Bitcoin Transaction for " . $customerEmail,
+                    ]);
 
             if (!$response->successful()) {
                 Log::error('OpenNode withdrawal failed: ' . $response->body());
@@ -86,7 +86,7 @@ class PaymentController extends Controller
                 $logoPath = public_path('ui/css/assets/img/logo.png');
                 // Process logo to add rounded corners
                 $processedLogoPath = $this->addRoundedCorners($logoPath);
-                
+
                 $qrCodeImage = QrCode::format('png')
                     ->size(300)
                     ->merge($processedLogoPath, .17, true)
@@ -94,7 +94,7 @@ class PaymentController extends Controller
                 $qrCodeFileName = 'mobileMoneyToBitcoin_' . time() . '.png';
                 $filePath = public_path('images/qrcodes/' . $qrCodeFileName);
                 file_put_contents($filePath, $qrCodeImage);
-                
+
                 // Clean up temporary logo file
                 if ($processedLogoPath !== $logoPath && file_exists($processedLogoPath)) {
                     unlink($processedLogoPath);
@@ -191,7 +191,7 @@ class PaymentController extends Controller
             for ($y = 0; $y < $height; $y++) {
                 // Check if pixel is in corner regions
                 $inCorner = false;
-                
+
                 // Top-left corner
                 if ($x < $radius && $y < $radius) {
                     $dx = $radius - $x;

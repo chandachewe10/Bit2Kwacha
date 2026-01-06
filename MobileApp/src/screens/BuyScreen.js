@@ -40,7 +40,7 @@ export default function BuyScreen() {
 
   const calculateBuy = () => {
     const amount = parseFloat(amountKwacha) || 0;
-    if (amount < 2) {
+    if (amount < 20) {
       setCalculations(null);
       return;
     }
@@ -66,8 +66,8 @@ export default function BuyScreen() {
   }, [amountKwacha, conversionRate]);
 
   const handleBuy = async () => {
-    if (!phone || !amountKwacha || parseFloat(amountKwacha) < 2) {
-      Alert.alert('Validation Error', 'Please enter a valid phone number and amount (minimum 2 ZMW)');
+    if (!phone || !amountKwacha || parseFloat(amountKwacha) < 20) {
+      Alert.alert('Validation Error', 'Please enter a valid phone number and amount (minimum 20 ZMW)');
       return;
     }
 
@@ -82,7 +82,7 @@ export default function BuyScreen() {
     try {
       // Check balance first
       const balanceCheck = await exchangeService.checkBalance(calculations.amountSats);
-      
+
       if (balanceCheck.status === 'error') {
         Alert.alert('Balance Check Failed', balanceCheck.message || 'Unable to verify account balance');
         setLoading(false);
@@ -104,10 +104,10 @@ export default function BuyScreen() {
 
       // Balance is sufficient, proceed to payment
       setLoadingText('Proceeding to Payment...');
-      
+
       // Submit data to subscription/payment route and open in browser
       const paymentUrl = `${API_BASE_URL}/subscription/payment`;
-      
+
       // Build query parameters
       const params = new URLSearchParams({
         phone: phone,
@@ -121,7 +121,7 @@ export default function BuyScreen() {
       });
 
       const fullUrl = `${paymentUrl}?${params.toString()}`;
-      
+
       // Open payment page in browser
       const canOpen = await Linking.canOpenURL(fullUrl);
       if (canOpen) {
@@ -129,7 +129,7 @@ export default function BuyScreen() {
       } else {
         Alert.alert('Error', 'Unable to open payment page. Please check your internet connection.');
       }
-      
+
     } catch (error) {
       console.error('Payment error:', error);
       Alert.alert('Error', error.message || 'An error occurred. Please try again.');
@@ -146,15 +146,18 @@ export default function BuyScreen() {
         <Text style={styles.subtitle}>Pay with mobile money or card, receive Bitcoin instantly</Text>
 
         <View style={styles.formGroup}>
-          <Text style={styles.label}>Phone Number</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="09XXXXXXXX"
-            value={phone}
-            onChangeText={setPhone}
-            keyboardType="phone-pad"
-          />
-          <Text style={styles.helperText}>QR code will be sent to this number via WhatsApp after payment</Text>
+          <Text style={styles.label}>Phone number to make the mobile money payments</Text>
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={styles.input}
+              placeholder="09XXXXXXXX"
+              placeholderTextColor={theme.colors.textGray}
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+            />
+          </View>
+
         </View>
 
         <View style={styles.formGroup}>
@@ -163,6 +166,7 @@ export default function BuyScreen() {
             <TextInput
               style={styles.input}
               placeholder="Enter amount"
+              placeholderTextColor={theme.colors.textGray}
               value={amountKwacha}
               onChangeText={setAmountKwacha}
               keyboardType="decimal-pad"
@@ -202,7 +206,7 @@ export default function BuyScreen() {
 
         <View style={styles.infoBadge}>
           <Text style={styles.infoText}>
-            Rate: 1 ZMW = ~{(1 / conversionRate).toFixed(2)} SATS | Min: 2 ZMW
+            Rate: 1 ZMW = ~{(1 / conversionRate).toFixed(2)} SATS | Min: 20 ZMW
           </Text>
         </View>
 
