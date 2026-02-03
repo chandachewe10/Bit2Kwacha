@@ -16,11 +16,11 @@ class SellBitcoinController extends Controller
             // Validate request data
             $data = $request->validate([
                 'phone' => 'required|string',
-                'amount_sats' => 'required|numeric|min:200',
+                'amount_sats' => 'required|numeric|min:500',
                 'amount_btc' => 'required|numeric',
                 'amount_kwacha' => 'required|numeric',
                 'conversion_fee' => 'required|numeric',
-                'total_sats' => 'required|numeric|min:200',
+                'total_sats' => 'required|numeric|min:500',
                 'network_fee' => 'required|numeric',
             ]);
 

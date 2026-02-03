@@ -694,6 +694,10 @@
                     <div class="form-group">
                         <label class="form-label">Mobile Money Number</label>
                         <input type="tel" name="phone" class="form-control" placeholder="09XXXXXXXX" required>
+                        <small
+                            style="color: var(--text-gray); font-size: 0.875rem; margin-top: 0.25rem; display: block;">
+                            Phone number to recieve the mobile money payments
+                        </small>
                     </div>
 
                     <div class="form-group">
@@ -825,6 +829,7 @@
         let liveConversionRate = {{ config('services.bitcoin.conversion_rate') }}; // Default fallback rate (SAT to ZMW)
         let btcUsdRate = null;
         const usdToZmwRate = 24; // Approximate USD to ZMW rate (can be made configurable)
+        const useOpenNodeExchangeRate = @json(config('services.bitcoin.use_open_node_exchange_rate'));
 
         // Fetch live exchange rates on page load
         async function fetchExchangeRates() {
@@ -922,8 +927,10 @@
             }
         }
 
-        // Fetch rates when page loads
-        fetchExchangeRates();
+        // Fetch rates when page loads (only if enabled via config/ENV)
+        if (useOpenNodeExchangeRate) {
+            fetchExchangeRates();
+        }
 
         // Tab switching
         function switchTab(tab) {
@@ -949,7 +956,7 @@
             }
 
             const conversionRate = liveConversionRate; // Use live SAT to ZMW rate
-            const serviceFeeRate = {{ config('services.bitcoin.service_fee_rate') }}; // Service fee rate
+            const serviceFeeRate = {{ config('services.bitcoin.service_fee_rate') }}; // Service fee rate (buy)
             const networkFee = {{ config('services.bitcoin.buy_network_fee') }}; // Network fee for buying
 
             const amountSats = amountKwacha / conversionRate;
@@ -983,7 +990,7 @@
             }
 
             const conversionRate = liveConversionRate; // Use live SAT to ZMW rate
-            const serviceFeeRate = {{ config('services.bitcoin.service_fee_rate') }}; // Service fee rate
+            const serviceFeeRate = {{ config('services.bitcoin.sell_service_fee_rate') }}; // Service fee rate (sell)
             const networkFee = {{ config('services.bitcoin.sell_network_fee') }}; // Network fee for selling
 
             const amountBtc = amountSats / 100000000;
@@ -1133,8 +1140,8 @@
 
             // Validate amount
             const amountSats = document.getElementById('sell-sats').value;
-            if (!amountSats || parseFloat(amountSats) < 200) {
-                alert('Please enter an amount of at least 200 SATS');
+            if (!amountSats || parseFloat(amountSats) < 500) {
+                alert('Please enter an amount of at least 500 SATS');
                 return;
             }
 
@@ -1167,12 +1174,12 @@
             };
 
             // Validate required fields
-            if (!data.phone || data.amount_sats < 200 || !data.total_sats) {
+            if (!data.phone || data.amount_sats < 500 || !data.total_sats) {
                 btn.disabled = false;
                 btn.classList.remove('btn-loading');
                 btn.style.pointerEvents = '';
                 btn.innerHTML = originalText;
-                alert('Please fill in phone number and ensure amount is at least 200 SATS. Make sure to click outside the amount field to calculate.');
+                alert('Please fill in phone number and ensure amount is at least 500 SATS. Make sure to click outside the amount field to calculate.');
                 return;
             }
 

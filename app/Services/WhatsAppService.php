@@ -29,10 +29,16 @@ class WhatsAppService
             $version = config('services.whatsapp.version', 'v19.0');
             $businessPhoneNumberId = config('services.whatsapp.business_phone_number_id');
             $token = config('services.whatsapp.token');
+            $baseUri = config('services.whatsapp.base_uri', 'https://graph.facebook.com');
 
             if (!$businessPhoneNumberId || !$token) {
                 Log::error('WhatsApp configuration missing: business_phone_number_id or token');
                 return false;
+            }
+
+            // Set BASE_URI in environment for the WhatsApp package classes
+            if (!isset($_ENV['BASE_URI'])) {
+                $_ENV['BASE_URI'] = $baseUri;
             }
 
             // Create message content

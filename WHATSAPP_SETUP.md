@@ -23,7 +23,10 @@ Add these to your `.env` file:
 WHATSAPP_VERSION=v19.0
 WHATSAPP_BUSINESS_PHONE_NUMBER_ID=your_business_phone_number_id
 WHATSAPP_TOKEN=your_whatsapp_access_token
+WHATSAPP_BASE_URI=https://graph.facebook.com
 ```
+
+**Note:** `WHATSAPP_BASE_URI` is optional and defaults to `https://graph.facebook.com` if not specified.
 
 ### Getting Your Credentials
 
@@ -64,6 +67,7 @@ To test the WhatsApp integration:
 - **Messages not sending**: Check your WhatsApp API credentials in `.env`
 - **QR code not showing**: Ensure the QR code URL is publicly accessible
 - **Phone number errors**: Verify phone number format in logs
+- **BASE_URI errors**: Ensure `WHATSAPP_BASE_URI` is set (defaults to `https://graph.facebook.com`)
 
 ## Notes
 

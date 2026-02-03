@@ -58,6 +58,7 @@ return [
         'version' => env('WHATSAPP_VERSION', 'v19.0'), // WhatsApp Business API version
         'business_phone_number_id' => env('WHATSAPP_BUSINESS_PHONE_NUMBER_ID'), // Your WhatsApp Business Phone Number ID
         'token' => env('WHATSAPP_TOKEN'), // WhatsApp Business API Access Token
+        'base_uri' => env('WHATSAPP_BASE_URI', 'https://graph.facebook.com'), // WhatsApp Business API base URL
     ],
 
     'bitcoin' => [
@@ -65,6 +66,8 @@ return [
         'service_fee_rate' => env('BITCOIN_SERVICE_FEE_RATE', 0.15), // 15% service fee
         'buy_network_fee' => env('BITCOIN_BUY_NETWORK_FEE', 5), // Network fee for buying (ZMW)
         'sell_network_fee' => env('BITCOIN_SELL_NETWORK_FEE', 400), // Network fee for selling (SATS)
+        // When true, front-end will use OpenNode live exchange rates; when false, it will use BITCOIN_CONVERSION_RATE only
+        'use_open_node_exchange_rate' => env('USE_OPENNODE_EXCHANGE_RATE', false),
     ],
 
 ];
