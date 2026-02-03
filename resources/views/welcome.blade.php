@@ -651,7 +651,7 @@
                             <span id="buy-amount-display">0.00</span>
                         </div>
                         <div class="calc-row">
-                            <span>Service Fee (8%):</span>
+                            <span>Service Fee:</span>
                             <span id="buy-fee-display">0.00 ZMW</span>
                         </div>
                         <div class="calc-row">
@@ -723,7 +723,7 @@
                             <span id="sell-sats-display">0</span>
                         </div>
                         <div class="calc-row">
-                            <span>Service Fee (8%):</span>
+                            <span>Service Fee:</span>
                             <span id="sell-fee-display">0 SATS</span>
                         </div>
                         <div class="calc-row">

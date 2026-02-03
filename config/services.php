@@ -35,7 +35,7 @@ return [
         ],
     ],
 
-     'opennode' => [
+    'opennode' => [
         'api_key' => env('OPENNODE_API_KEY'),
         'api_key_withdrawal' => env('OPENNODE_WITHDRAWAL_API_KEY'),
         'exchange_rates_token' => env('EXCHANGE_RATES_TOKEN'),
@@ -47,11 +47,11 @@ return [
         'withdrawal' => env('OPENNODE_WEBHOOK_WITHDRAWAL_CALLBACK')
     ],
 
-     'lenco' => [
+    'lenco' => [
         'token' => env('LENCO_TOKEN'),
         'base_uri' => env('LENCO_BASE_URI'),
         'wallet_uuid' => env('LENCO_WALLET_UUID'),
-        
+
     ],
 
     'whatsapp' => [
@@ -62,7 +62,7 @@ return [
 
     'bitcoin' => [
         'conversion_rate' => env('BITCOIN_CONVERSION_RATE', 0.023), // SAT to ZMW rate (1 SAT = 0.023 ZMW)
-        'service_fee_rate' => env('BITCOIN_SERVICE_FEE_RATE', 0.08), // 8% service fee
+        'service_fee_rate' => env('BITCOIN_SERVICE_FEE_RATE', 0.15), // 15% service fee
         'buy_network_fee' => env('BITCOIN_BUY_NETWORK_FEE', 5), // Network fee for buying (ZMW)
         'sell_network_fee' => env('BITCOIN_SELL_NETWORK_FEE', 400), // Network fee for selling (SATS)
     ],

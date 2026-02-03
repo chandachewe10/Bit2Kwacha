@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Modal,
   Image,
+  Linking,
 } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { exchangeService } from '../services/exchangeService';
@@ -108,6 +109,30 @@ export default function SellScreen() {
       Alert.alert('Error', error.message || 'An error occurred. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOpenWallet = async () => {
+    if (!invoiceData?.bolt11) return;
+
+    try {
+      const url = `lightning:${invoiceData.bolt11}`;
+
+      // Try to open directly first as canOpenURL can be unreliable on Android 11+ without specific manifest queries
+      try {
+        await Linking.openURL(url);
+      } catch (err) {
+        // Only if direct open fails, try checking support
+        const supported = await Linking.canOpenURL(url);
+        if (supported) {
+          await Linking.openURL(url);
+        } else {
+          Alert.alert('Error', 'No compatible wallet found to open this invoice. Please copy the invoice and paste it in your wallet.');
+        }
+      }
+    } catch (error) {
+      console.error('Error opening wallet:', error);
+      Alert.alert('Error', 'Could not open wallet to pay invoice.');
     }
   };
 
@@ -220,6 +245,12 @@ export default function SellScreen() {
                     />
                   </View>
                 </View>
+                <TouchableOpacity
+                  style={[styles.button, { marginTop: 0, marginBottom: 15 }]}
+                  onPress={handleOpenWallet}
+                >
+                  <Text style={styles.buttonText}>Open in Wallet</Text>
+                </TouchableOpacity>
                 <Text style={styles.invoiceText} selectable>
                   {invoiceData.bolt11}
                 </Text>
