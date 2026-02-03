@@ -18,7 +18,7 @@ class ConfirmBitCoinToMobileController extends Controller
         try {
             Log::info('OPENNODE Webhook Raw:', $request->all());
 
-            $data = $request->all(); 
+            $data = $request->all();
 
             Log::info('OPENNODE Webhook Parsed:', $data);
 
@@ -35,7 +35,7 @@ class ConfirmBitCoinToMobileController extends Controller
                     'checking_id' => $data['id']
                 ]);
                 return response()->json([
-                    'status'  => 'error',
+                    'status' => 'error',
                     'message' => 'Invalid checking_id',
                 ], 400);
             }
@@ -45,9 +45,17 @@ class ConfirmBitCoinToMobileController extends Controller
                 $isPaid = ($data['status'] === 'paid');
             }
 
+            if ($payment->payment_status === 'paid') {
+                Log::info('Payment already scheduled/paid, ignoring duplicate webhook', ['id' => $data['id']]);
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Payment already processed',
+                ]);
+            }
+
             $payment->update([
                 'payment_status' => $isPaid ? 'paid' : 'pending',
-                'paid_at'        => $isPaid ? now() : null,
+                'paid_at' => $isPaid ? now() : null,
             ]);
 
             if ($isPaid) {
@@ -58,23 +66,23 @@ class ConfirmBitCoinToMobileController extends Controller
                     '097', '077' => 'airtel',
                     '096', '076' => 'mtn',
                     '095', '075' => 'zamtel',
-                    default      => 'unknown',
+                    default => 'unknown',
                 };
 
                 $response = Http::withHeaders([
                     'Authorization' => 'Bearer ' . config('services.lenco.token'),
-                    'Accept'        => 'application/json',
-                    'Content-Type'  => 'application/json',
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
                 ])->post(config('services.lenco.base_uri') . '/transfers/mobile-money', [
-                    'accountId'           => config('services.lenco.wallet_uuid'),
-                    'amount'              => $payment->amount_kwacha,
-                    'narration'           => 'BitCoin Transfer to Mobile Money',
-                    'reference'           => $payment->id . '-' . mt_rand(),
-                    'transferRecipientId' => '',
-                    'phone'               => $payment->mobile_number,
-                    'operator'            => $operator,
-                    'country'             => 'zm',
-                ]);
+                            'accountId' => config('services.lenco.wallet_uuid'),
+                            'amount' => $payment->amount_kwacha,
+                            'narration' => 'BitCoin Transfer to Mobile Money',
+                            'reference' => $payment->id . '-' . mt_rand(),
+                            'transferRecipientId' => '',
+                            'phone' => $payment->mobile_number,
+                            'operator' => $operator,
+                            'country' => 'zm',
+                        ]);
 
                 if ($response->successful()) {
                     Log::info('Lenco Transfer OK:', $response->json());
@@ -84,13 +92,13 @@ class ConfirmBitCoinToMobileController extends Controller
             }
 
             return response()->json([
-                'status'  => 'success',
+                'status' => 'success',
                 'payment' => $payment,
             ]);
         } catch (\Throwable $e) {
             Log::error('API Error:', ['message' => $e->getMessage()]);
             return response()->json([
-                'status'  => 'error',
+                'status' => 'error',
                 'message' => $e->getMessage(),
             ], 500);
         }
