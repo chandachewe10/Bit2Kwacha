@@ -45,7 +45,7 @@ export default function BuyScreen() {
       return;
     }
 
-    const serviceFeeRate = 0.08; // 8%
+    const serviceFeeRate = 0.15; // 15%
     const networkFee = 5; // ZMW
 
     const amountSats = amount / conversionRate;
@@ -182,7 +182,7 @@ export default function BuyScreen() {
               <Text style={styles.calcValue}>{parseFloat(amountKwacha).toFixed(2)}</Text>
             </View>
             <View style={styles.calcRow}>
-              <Text style={styles.calcLabel}>Service Fee (8%):</Text>
+              <Text style={styles.calcLabel}>Service Fee:</Text>
               <Text style={styles.calcValue}>{calculations.conversionFee.toFixed(2)} ZMW</Text>
             </View>
             <View style={styles.calcRow}>

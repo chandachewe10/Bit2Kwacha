@@ -46,7 +46,7 @@ export default function SellScreen() {
       return;
     }
 
-    const serviceFeeRate = 0.08; // 8%
+    const serviceFeeRate = 0.15; // 15%
     const networkFee = 400; // SATS
 
     const amountBtc = amount / 100000000;
@@ -153,7 +153,7 @@ export default function SellScreen() {
               <Text style={styles.calcValue}>{parseFloat(amountSats).toLocaleString()}</Text>
             </View>
             <View style={styles.calcRow}>
-              <Text style={styles.calcLabel}>Service Fee (8%):</Text>
+              <Text style={styles.calcLabel}>Service Fee:</Text>
               <Text style={styles.calcValue}>{Math.round(calculations.conversionFee).toLocaleString()} SATS</Text>
             </View>
             <View style={styles.calcRow}>
