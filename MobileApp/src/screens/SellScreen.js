@@ -83,6 +83,28 @@ export default function SellScreen() {
     setLoading(true);
 
     try {
+      // Step 1: Check Lenco float balance before proceeding
+      const floatCheck = await exchangeService.checkLencoBalance(calculations.receiveKwacha);
+
+      if (floatCheck.status === 'error') {
+        Alert.alert(
+          'Float Check Failed',
+          floatCheck.message || 'Unable to verify available float. Please try again later.'
+        );
+        setLoading(false);
+        return;
+      }
+
+      if (floatCheck.sufficient === false) {
+        Alert.alert(
+          'Temporarily Out of Float',
+          `We've temporarily run out of float to process your sell order of ${calculations.receiveKwacha.toFixed(2)} ZMW. Please try again in a few minutes.`
+        );
+        setLoading(false);
+        return;
+      }
+
+      // Step 2: Float is sufficient, generate the invoice
       const data = {
         phone,
         amount_sats: parseFloat(amountSats),
@@ -96,7 +118,14 @@ export default function SellScreen() {
       const result = await exchangeService.generateInvoice(data);
 
       if (result.status === 'error') {
-        Alert.alert('Error', result.message || 'Failed to generate invoice');
+        if (result.insufficient_float) {
+          Alert.alert(
+            'Temporarily Out of Float',
+            result.message || "We've temporarily run out of float. Please try again later or contact support."
+          );
+        } else {
+          Alert.alert('Error', result.message || 'Failed to generate invoice');
+        }
         setLoading(false);
         return;
       }

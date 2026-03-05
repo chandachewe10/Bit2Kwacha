@@ -8,8 +8,92 @@ use Illuminate\Support\Facades\Log;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Models\BitCoinToMobileMoney;
 
+
 class SellBitcoinController extends Controller
 {
+    /**
+     * Check Lenco wallet balance to ensure we have enough ZMW float
+     * to pay the user when they sell Bitcoin.
+     *
+     * @param float|null $requiredAmount  Optional ZMW amount to validate against
+     * @return array  ['status' => 'success'|'error', 'available_balance' => float, 'sufficient' => bool, ...]
+     */
+    public function checkLencoFloat($requiredAmount = null)
+    {
+        try {
+            $token = config('services.lenco.token');
+            $walletUuid = config('services.lenco.wallet_uuid');
+            $baseUri = config('services.lenco.base_uri');
+
+            if (!$token || !$walletUuid || !$baseUri) {
+                Log::error('Lenco configuration missing for balance check');
+                return [
+                    'status' => 'error',
+                    'message' => 'Float check service not configured. Please contact support.',
+                ];
+            }
+
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $token,
+                'Accept' => 'application/json',
+            ])->get("{$baseUri}/accounts/{$walletUuid}/balance");
+
+            if (!$response->successful()) {
+                Log::error('Lenco balance API error: ' . $response->body());
+                return [
+                    'status' => 'error',
+                    'message' => 'Unable to verify available float. Please try again later.',
+                    'http_status' => $response->status(),
+                ];
+            }
+
+            $data = $response->json();
+
+            if (!($data['status'] ?? false)) {
+                Log::error('Lenco balance API returned unsuccessful status: ' . json_encode($data));
+                return [
+                    'status' => 'error',
+                    'message' => 'Unable to verify available float. Please try again later.',
+                ];
+            }
+
+            $availableBalance = (float) ($data['data']['availableBalance'] ?? 0);
+            $currency = $data['data']['currency'] ?? 'ZMW';
+
+            $result = [
+                'status' => 'success',
+                'available_balance' => $availableBalance,
+                'currency' => $currency,
+            ];
+
+            if ($requiredAmount !== null) {
+                $result['sufficient'] = $availableBalance >= $requiredAmount;
+                $result['required_amount'] = $requiredAmount;
+            }
+
+            return $result;
+        } catch (\Exception $e) {
+            Log::error('Error checking Lenco balance: ' . $e->getMessage());
+            return [
+                'status' => 'error',
+                'message' => 'An error occurred while checking float. Please try again later.',
+                'error' => config('app.debug') ? $e->getMessage() : null,
+            ];
+        }
+    }
+
+    /**
+     * API endpoint to check Lenco float balance (for client-side pre-check)
+     */
+    public function checkFloat(Request $request)
+    {
+        $requiredAmount = $request->input('amount_kwacha') ? (float) $request->input('amount_kwacha') : null;
+        $result = $this->checkLencoFloat($requiredAmount);
+
+        $statusCode = $result['status'] === 'success' ? 200 : 500;
+        return response()->json($result, $statusCode);
+    }
+
     public function generateInvoice(Request $request)
     {
         try {
@@ -24,10 +108,30 @@ class SellBitcoinController extends Controller
                 'network_fee' => 'required|numeric',
             ]);
 
+            // ── Check Lenco wallet float before proceeding ──
+            $floatCheck = $this->checkLencoFloat((float) $data['amount_kwacha']);
+
+            if ($floatCheck['status'] !== 'success') {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $floatCheck['message'] ?? 'Unable to verify float. Please try again later.',
+                ], 503);
+            }
+
+            if (!($floatCheck['sufficient'] ?? false)) {
+                $available = number_format($floatCheck['available_balance'] ?? 0, 2);
+                Log::warning('Insufficient Lenco float for sell. Required: ' . $data['amount_kwacha'] . ' ZMW, Available: ' . $available . ' ZMW');
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "We've temporarily run out of float. Please try again later or contact support.",
+                    'insufficient_float' => true,
+                ], 200);
+            }
+
             // Check OpenNode configuration
             $apiKey = config('services.opennode.api_key');
             $baseUri = config('services.opennode.base_uri');
-            
+
             if (!$apiKey || !$baseUri) {
                 Log::error('OpenNode configuration missing');
                 return response()->json([
@@ -41,16 +145,16 @@ class SellBitcoinController extends Controller
                 'Authorization' => 'Bearer ' . $apiKey,
                 'Content-Type' => 'application/json',
             ])->post($baseUri . '/charges', [
-                'amount' => (int) $data['total_sats'],
-                'description' => 'Bitcoin to Kwacha - ' . $data['phone'],
-                'customer_name' => 'Customer',
-                'customer_email' => 'customer@bitkwik.com',
-                'order_id' => 'sell_' . time(),
-                'callback_url' => config('services.opennode.mobile_money'),
-                'success_url' => env('APP_URL'),
-                'auto_settle' => true,
-                'ttl' => 10,
-            ]);
+                        'amount' => (int) $data['total_sats'],
+                        'description' => 'Bitcoin to Kwacha - ' . $data['phone'],
+                        'customer_name' => 'Customer',
+                        'customer_email' => 'customer@bitkwik.com',
+                        'order_id' => 'sell_' . time(),
+                        'callback_url' => config('services.opennode.mobile_money'),
+                        'success_url' => env('APP_URL'),
+                        'auto_settle' => true,
+                        'ttl' => 10,
+                    ]);
 
             if (!$response->successful()) {
                 Log::error('OpenNode invoice generation failed: ' . $response->body());
@@ -76,22 +180,22 @@ class SellBitcoinController extends Controller
             $logoPath = public_path('ui/css/assets/img/logo.png');
             // Process logo to add rounded corners
             $processedLogoPath = $this->addRoundedCorners($logoPath);
-            
+
             $qrCodeImage = QrCode::format('png')
                 ->size(400)
                 ->merge($processedLogoPath, .17, true)
                 ->generate($bolt11);
             $qrCodeDir = public_path('images/qrcodes');
-            
+
             // Ensure directory exists
             if (!file_exists($qrCodeDir)) {
                 mkdir($qrCodeDir, 0755, true);
             }
-            
+
             $qrCodeFileName = 'sell_bitcoin_' . time() . '.png';
             $filePath = $qrCodeDir . '/' . $qrCodeFileName;
             file_put_contents($filePath, $qrCodeImage);
-            
+
             // Clean up temporary logo file
             if ($processedLogoPath !== $logoPath && file_exists($processedLogoPath)) {
                 unlink($processedLogoPath);
@@ -140,11 +244,11 @@ class SellBitcoinController extends Controller
             Log::error('Error generating invoice: ' . $e->getMessage());
             Log::error('File: ' . $e->getFile() . ' Line: ' . $e->getLine());
             Log::error('Stack trace: ' . $e->getTraceAsString());
-            
-            $errorMessage = config('app.debug') 
+
+            $errorMessage = config('app.debug')
                 ? $e->getMessage() . ' (File: ' . basename($e->getFile()) . ', Line: ' . $e->getLine() . ')'
                 : 'An error occurred. Please try again.';
-            
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'An error occurred. Please try again.',
@@ -185,7 +289,7 @@ class SellBitcoinController extends Controller
             for ($y = 0; $y < $height; $y++) {
                 // Check if pixel is in corner regions
                 $inCorner = false;
-                
+
                 // Top-left corner
                 if ($x < $radius && $y < $radius) {
                     $dx = $radius - $x;

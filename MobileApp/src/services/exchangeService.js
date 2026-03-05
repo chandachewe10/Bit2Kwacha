@@ -41,6 +41,21 @@ export const exchangeService = {
   },
 
   /**
+   * Check Lenco wallet float balance (ZMW) before selling Bitcoin
+   */
+  async checkLencoBalance(amountKwacha) {
+    try {
+      const response = await api.post(apiEndpoints.checkLencoBalance, {
+        amount_kwacha: amountKwacha,
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error checking Lenco balance:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Generate Lightning invoice for selling Bitcoin
    */
   async generateInvoice(data) {

@@ -95,7 +95,7 @@ export default function BuyScreen() {
         const requiredSats = Math.round(balanceCheck.required_sats || 0).toLocaleString();
         Alert.alert(
           'Insufficient Balance',
-          `We currently don't have enough Bitcoin in stock. You requested ${requiredSats} SATS, but we only have ${balanceSats} SATS available.`
+          `We currently don't have enough Bitcoin in stock. You requested ${requiredSats} SATS, but we only have a few SATS available. Please try again in a few minutes.`
         );
         setLoading(false);
         setLoadingText('Proceed to Payment');

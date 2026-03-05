@@ -1129,7 +1129,7 @@
         }
 
         // Handle Sell form submission
-        function handleSell(event) {
+        async function handleSell(event) {
             event.preventDefault();
             const form = event.target;
             const formData = new FormData(form);
@@ -1144,13 +1144,6 @@
 
             // Ensure calculations are done
             calculateSell();
-
-            // Show loading state
-            btn.disabled = true;
-            btn.classList.add('btn-loading');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = 'Generating Invoice...';
-            btn.style.pointerEvents = 'none';
 
             // Get values from hidden fields (they should be populated by calculateSell)
             const amountSatsValue = parseFloat(document.getElementById('sell-sats-hidden').value) || parseFloat(amountSats);
@@ -1172,57 +1165,106 @@
 
             // Validate required fields
             if (!data.phone || data.amount_sats < 500 || !data.total_sats) {
-                btn.disabled = false;
-                btn.classList.remove('btn-loading');
-                btn.style.pointerEvents = '';
-                btn.innerHTML = originalText;
                 alert('Please fill in phone number and ensure amount is at least 500 SATS. Make sure to click outside the amount field to calculate.');
                 return;
             }
 
-            console.log('Sending data:', data);
+            // Show loading state
+            btn.disabled = true;
+            btn.classList.add('btn-loading');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Checking float availability...';
+            btn.style.pointerEvents = 'none';
 
-            // Make API call
-            fetch('{{ route("generate.invoice") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-                .then(async response => {
-                    const result = await response.json();
-
-                    // Reset button
-                    btn.disabled = false;
-                    btn.classList.remove('btn-loading');
-                    btn.style.pointerEvents = '';
-                    btn.innerHTML = originalText;
-
-                    if (!response.ok || result.status === 'error') {
-                        // Show detailed error in modal
-                        showErrorModal(result.message || 'Failed to generate invoice', result.error || result.details || 'Unknown error');
-                        console.error('API Error:', result);
-                        return;
-                    }
-
-                    if (result.status === 'success') {
-                        showInvoiceModal(result);
-                    } else {
-                        showErrorModal('Failed to generate invoice', result.message || 'Unknown error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Fetch Error:', error);
-                    // Reset button
-                    btn.disabled = false;
-                    btn.classList.remove('btn-loading');
-                    btn.style.pointerEvents = '';
-                    btn.innerHTML = originalText;
-                    showErrorModal('Network Error', error.message || 'Failed to connect to server. Please check your internet connection and try again.');
+            try {
+                // ── Step 1: Check Lenco float balance ──
+                const floatResponse = await fetch('{{ route("check.lenco.balance") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount_kwacha: amountKwachaValue
+                    })
                 });
+
+                const floatResult = await floatResponse.json();
+                console.log('Lenco float check result:', floatResult);
+
+                if (floatResult.status === 'error') {
+                    btn.disabled = false;
+                    btn.classList.remove('btn-loading');
+                    btn.style.pointerEvents = '';
+                    btn.innerHTML = originalText;
+                    showErrorModal('Float Check Failed', floatResult.message || 'Unable to verify available float. Please try again later.');
+                    return;
+                }
+
+                if (floatResult.sufficient === false) {
+                    btn.disabled = false;
+                    btn.classList.remove('btn-loading');
+                    btn.style.pointerEvents = '';
+                    btn.innerHTML = originalText;
+                    showErrorModal(
+                        'Temporarily Out of Float',
+                        `We've temporarily run out of float to process your sell order of ${amountKwachaValue.toFixed(2)} ZMW. Please try again after a few minutes.`
+                    );
+                    return;
+                }
+
+                // ── Step 2: Float is sufficient, generate the invoice ──
+                btn.innerHTML = 'Generating Invoice...';
+
+                console.log('Sending data:', data);
+
+                const invoiceResponse = await fetch('{{ route("generate.invoice") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await invoiceResponse.json();
+
+                // Reset button
+                btn.disabled = false;
+                btn.classList.remove('btn-loading');
+                btn.style.pointerEvents = '';
+                btn.innerHTML = originalText;
+
+                if (!invoiceResponse.ok || result.status === 'error') {
+                    // Check if it's an insufficient float error from the server-side double-check
+                    if (result.insufficient_float) {
+                        showErrorModal(
+                            'Temporarily Out of Float',
+                            result.message || "We've temporarily run out of float. Please try again later or contact support."
+                        );
+                    } else {
+                        showErrorModal(result.message || 'Failed to generate invoice', result.error || result.details || 'Unknown error');
+                    }
+                    console.error('API Error:', result);
+                    return;
+                }
+
+                if (result.status === 'success') {
+                    showInvoiceModal(result);
+                } else {
+                    showErrorModal('Failed to generate invoice', result.message || 'Unknown error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                // Reset button
+                btn.disabled = false;
+                btn.classList.remove('btn-loading');
+                btn.style.pointerEvents = '';
+                btn.innerHTML = originalText;
+                showErrorModal('Network Error', error.message || 'Failed to connect to server. Please check your internet connection and try again.');
+            }
         }
 
         // Show error modal

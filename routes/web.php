@@ -54,3 +54,6 @@ Route::post('/api/check-balance', [ExchangeRateController::class, 'checkBalance'
 
 Route::get('/api/get-balance', [ExchangeRateController::class, 'getBalance'])
     ->name('get.balance');
+
+Route::post('/api/check-lenco-balance', [SellBitcoinController::class, 'checkFloat'])
+    ->name('check.lenco.balance');
