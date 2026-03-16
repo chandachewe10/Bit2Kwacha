@@ -1087,7 +1087,7 @@
                     const requiredSats = Math.round(balanceResult.required_sats || 0).toLocaleString();
                     showErrorModal(
                         'Insufficient Balance',
-                        `We currently don't have enough Bitcoin in stock to fulfill your order. You requested ${requiredSats} SATS, but we only have few SATS available. Please try again later or contact support.`
+                        `We currently don't have enough Bitcoin in stock to fulfill your order. You requested ${requiredSats} SATS, but we only have few SATS available. Please try again later after some few minutes.`
                     );
                     return;
                 }
@@ -1242,7 +1242,7 @@
                     if (result.insufficient_float) {
                         showErrorModal(
                             'Temporarily Out of Float',
-                            result.message || "We've temporarily run out of float. Please try again later or contact support."
+                            result.message || "We've temporarily run out of float. Please try again later after some few minutes."
                         );
                     } else {
                         showErrorModal(result.message || 'Failed to generate invoice', result.error || result.details || 'Unknown error');
