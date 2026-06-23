@@ -18,7 +18,7 @@ return new class extends Migration
             $table->decimal('total_sats', 16, 2)->nullable();
             $table->decimal('network_fee', 16, 2)->default(400);
             $table->string('qr_code_path')->nullable();
-            $table->string('lightning_invoice_address')->nullable();
+            $table->text('lightning_invoice_address')->nullable();
             $table->string('checking_id')->nullable();
             $table->string('checkout_url')->nullable();
             $table->string('payment_status')->default('pending');

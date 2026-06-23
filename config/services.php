@@ -45,8 +45,16 @@ return [
         'mobile_money' => env('OPENNODE_WEBHOOK_MOBILE_MONEY'),
         'bank_transfer' => env('OPENNODE_WEBHOOK_BANK_TRANSFER'),
         'withdrawal' => env('OPENNODE_WEBHOOK_WITHDRAWAL_CALLBACK'),
-        'airtime' => env('OPENNODE_WEBHOOK_AIRTIME'),
-        'success_url' => env('OPENNODE_SUCCESS_URL'),
+        'airtime' => env('OPENNODE_WEBHOOK_AIRTIME') ?: (
+            ($mobileWebhook = env('OPENNODE_WEBHOOK_MOBILE_MONEY'))
+                ? preg_replace('#/confirm-bitcoin-to-mobile$#', '/confirm-bitcoin-to-airtime', $mobileWebhook)
+                : null
+        ),
+        'success_url' => env('OPENNODE_SUCCESS_URL') ?: (
+            ($mobileWebhook = env('OPENNODE_WEBHOOK_MOBILE_MONEY'))
+                ? rtrim(preg_replace('#/api/confirm-bitcoin-to-mobile$#', '', $mobileWebhook), '/')
+                : null
+        ),
     ],
 
     'africastalking' => [

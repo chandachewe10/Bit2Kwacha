@@ -24,8 +24,24 @@ class ConfirmBitCoinToAirtimeController extends Controller
             $payment = AirtimePurchase::where('checking_id', $data['id'])->first();
 
             if (!$payment) {
-                Log::warning('Invalid checking_id in airtime webhook', [
+                $status = $data['status'] ?? null;
+
+                if ($status !== 'paid') {
+                    Log::info('Airtime webhook for unknown charge (non-paid), ignoring', [
+                        'checking_id' => $data['id'],
+                        'status' => $status,
+                        'order_id' => $data['order_id'] ?? null,
+                    ]);
+
+                    return response()->json([
+                        'status' => 'success',
+                        'message' => 'No matching purchase; non-paid status ignored',
+                    ]);
+                }
+
+                Log::error('Paid airtime webhook with no matching purchase', [
                     'checking_id' => $data['id'],
+                    'order_id' => $data['order_id'] ?? null,
                 ]);
 
                 return response()->json([
