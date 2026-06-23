@@ -48,6 +48,7 @@ export const apiEndpoints = {
     checkBalance: "/api/check-balance",
     checkLencoBalance: "/api/check-lenco-balance",
     generateInvoice: "/api/generate-invoice",
+    generateAirtimeInvoice: "/api/generate-airtime-invoice",
     subscriptionPayment: "/subscription/payment", // Web route, not API
     completeSubscription: "/api/complete-subscription",
 };

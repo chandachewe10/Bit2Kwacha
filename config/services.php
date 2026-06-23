@@ -44,7 +44,15 @@ return [
         'base_uri_withdrawal' => env('OPENNODE_BASE_URI_FOR_WITHDRAWAL'),
         'mobile_money' => env('OPENNODE_WEBHOOK_MOBILE_MONEY'),
         'bank_transfer' => env('OPENNODE_WEBHOOK_BANK_TRANSFER'),
-        'withdrawal' => env('OPENNODE_WEBHOOK_WITHDRAWAL_CALLBACK')
+        'withdrawal' => env('OPENNODE_WEBHOOK_WITHDRAWAL_CALLBACK'),
+        'airtime' => env('OPENNODE_WEBHOOK_AIRTIME'),
+        'success_url' => env('OPENNODE_SUCCESS_URL'),
+    ],
+
+    'africastalking' => [
+        'username' => env('AT_USERNAME'),
+        'api_key' => env('AT_API_KEY'),
+        'base_uri' => env('AT_BASE_URI', 'https://api.africastalking.com/version1'),
     ],
 
     'lenco' => [

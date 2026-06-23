@@ -69,6 +69,19 @@ export const exchangeService = {
   },
 
   /**
+   * Generate Lightning invoice for buying airtime with Bitcoin
+   */
+  async generateAirtimeInvoice(data) {
+    try {
+      const response = await api.post(apiEndpoints.generateAirtimeInvoice, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error generating airtime invoice:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Complete subscription/payment for buying Bitcoin
    */
   async completeSubscription(data) {

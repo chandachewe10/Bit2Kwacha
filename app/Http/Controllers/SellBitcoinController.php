@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Models\BitCoinToMobileMoney;
+use App\Services\OpenNodeService;
 
 
 class SellBitcoinController extends Controller
@@ -144,17 +145,13 @@ class SellBitcoinController extends Controller
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $apiKey,
                 'Content-Type' => 'application/json',
-            ])->post($baseUri . '/charges', [
+            ])->post(OpenNodeService::chargesUrl(), OpenNodeService::chargePayload([
                         'amount' => (int) $data['total_sats'],
                         'description' => 'Bitcoin to Kwacha - ' . $data['phone'],
                         'customer_name' => 'Customer',
                         'customer_email' => 'customer@bitkwik.com',
                         'order_id' => 'sell_' . time(),
-                        'callback_url' => config('services.opennode.mobile_money'),
-                        'success_url' => env('APP_URL'),
-                        'auto_settle' => true,
-                        'ttl' => 10,
-                    ]);
+                    ], config('services.opennode.mobile_money')));
 
             if (!$response->successful()) {
                 Log::error('OpenNode invoice generation failed: ' . $response->body());

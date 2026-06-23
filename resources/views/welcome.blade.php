@@ -591,11 +591,14 @@
     <section class="conversion-section">
         <div class="container">
             <div class="conversion-tabs">
-                <button class="tab-btn active" onclick="switchTab('buy')">
+                <button class="tab-btn active" id="buy-tab" onclick="switchTab('buy')">
                     <i class="bi bi-arrow-down-circle"></i> Buy Bitcoin (ZMW → BTC)
                 </button>
-                <button class="tab-btn" onclick="switchTab('sell')">
+                <button class="tab-btn" id="sell-tab" onclick="switchTab('sell')">
                     <i class="bi bi-arrow-up-circle"></i> Sell Bitcoin (BTC → ZMW)
+                </button>
+                <button class="tab-btn" id="airtime-tab" onclick="switchTab('airtime')">
+                    <i class="bi bi-phone"></i> Buy Airtime (BTC → Talktime)
                 </button>
             </div>
 
@@ -759,6 +762,71 @@
                     </button>
                 </form>
             </div>
+
+            <!-- Buy Airtime Card -->
+            <div id="airtime-card" class="conversion-card">
+                <div class="card-header">
+                    <h2>Buy Airtime with Bitcoin</h2>
+                    <p>Pay with Bitcoin, receive talktime instantly on your phone</p>
+                </div>
+
+                <form id="airtime-form" onsubmit="handleAirtime(event)">
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" name="phone" class="form-control" placeholder="09XXXXXXXX" required>
+                        <small
+                            style="color: var(--text-gray); font-size: 0.875rem; margin-top: 0.25rem; display: block;">
+                            Phone number to receive airtime (Airtel, MTN, or Zamtel)
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Airtime Amount</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="airtime-kwacha" class="form-control" placeholder="Enter amount"
+                                min="1" max="100" step="0.01" required oninput="calculateAirtime()">
+                            <span class="input-suffix">ZMW</span>
+                        </div>
+                    </div>
+
+                    <div class="swap-icon">
+                        <i class="bi bi-arrow-down"></i>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">You'll Pay</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="airtime-sats-display" class="form-control" readonly value="0">
+                            <span class="input-suffix">SATS</span>
+                        </div>
+                    </div>
+
+                    <div class="calculation-box" id="airtime-calc" style="display: none;">
+                        <div class="calc-row">
+                            <span>Airtime Value:</span>
+                            <span id="airtime-kwacha-display">0.00 ZMW</span>
+                        </div>
+                        <div class="calc-row">
+                            <span>You'll Pay:</span>
+                            <span id="airtime-total-display">0 SATS</span>
+                        </div>
+                    </div>
+
+                    <div class="info-badge">
+                        <i class="bi bi-info-circle"></i>
+                        <span id="airtime-rate-text">Rate: 1 SAT = {{ config('services.bitcoin.conversion_rate') }} ZMW | Min: 1 ZMW | Max: 100 ZMW</span>
+                    </div>
+
+                    <input type="hidden" name="amount_kwacha" id="airtime-kwacha-hidden">
+                    <input type="hidden" name="amount_sats" id="airtime-sats-hidden">
+                    <input type="hidden" name="amount_btc" id="airtime-btc">
+                    <input type="hidden" name="total_sats" id="airtime-total">
+
+                    <button type="submit" class="btn-primary" id="airtime-btn">
+                        Generate Lightning Invoice <i class="bi bi-lightning-charge"></i>
+                    </button>
+                </form>
+            </div>
         </div>
     </section>
 
@@ -860,6 +928,10 @@
                     if (sellAmount && parseFloat(sellAmount) >= 200) {
                         calculateSell();
                     }
+                    const airtimeAmount = document.getElementById('airtime-kwacha').value;
+                    if (airtimeAmount && parseFloat(airtimeAmount) >= 1 && parseFloat(airtimeAmount) <= 100) {
+                        calculateAirtime();
+                    }
                 } else {
                     console.warn('Failed to fetch exchange rates, using default rate');
                 }
@@ -873,15 +945,20 @@
         function updateRateDisplay() {
             const buyRateText = `Rate: 1 ZMW = ~${(1 / liveConversionRate).toFixed(2)} SATS | Min: 20 ZMW`;
             const sellRateText = `Rate: 1 SAT = ${liveConversionRate.toFixed(4)} ZMW | Min: 200 SATS`;
+            const airtimeRateText = `Rate: 1 SAT = ${liveConversionRate.toFixed(4)} ZMW | Min: 1 ZMW | Max: 100 ZMW`;
 
             const buyInfoBadge = document.querySelector('#buy-card .info-badge span');
             const sellInfoBadge = document.querySelector('#sell-card .info-badge span');
+            const airtimeRateEl = document.getElementById('airtime-rate-text');
 
             if (buyInfoBadge) {
                 buyInfoBadge.textContent = buyRateText;
             }
             if (sellInfoBadge) {
                 sellInfoBadge.textContent = sellRateText;
+            }
+            if (airtimeRateEl) {
+                airtimeRateEl.textContent = airtimeRateText;
             }
         }
 
@@ -935,11 +1012,14 @@
             document.querySelectorAll('.conversion-card').forEach(card => card.classList.remove('active'));
 
             if (tab === 'buy') {
-                document.querySelector('.tab-btn:first-child').classList.add('active');
+                document.getElementById('buy-tab').classList.add('active');
                 document.getElementById('buy-card').classList.add('active');
-            } else {
-                document.querySelector('.tab-btn:last-child').classList.add('active');
+            } else if (tab === 'sell') {
+                document.getElementById('sell-tab').classList.add('active');
                 document.getElementById('sell-card').classList.add('active');
+            } else if (tab === 'airtime') {
+                document.getElementById('airtime-tab').classList.add('active');
+                document.getElementById('airtime-card').classList.add('active');
             }
         }
 
@@ -1011,6 +1091,32 @@
             document.getElementById('sell-total').value = Math.round(totalSats);
 
             document.getElementById('sell-calc').style.display = 'block';
+        }
+
+        // Buy Airtime calculations
+        function calculateAirtime() {
+            const amountKwacha = parseFloat(document.getElementById('airtime-kwacha').value) || 0;
+
+            if (amountKwacha < 1 || amountKwacha > 100) {
+                document.getElementById('airtime-calc').style.display = 'none';
+                return;
+            }
+
+            const conversionRate = liveConversionRate;
+            const amountSats = amountKwacha / conversionRate;
+            const amountBtc = amountSats / 100000000;
+            const totalSats = Math.round(amountSats);
+
+            document.getElementById('airtime-kwacha-display').textContent = amountKwacha.toFixed(2) + ' ZMW';
+            document.getElementById('airtime-total-display').textContent = totalSats.toLocaleString() + ' SATS';
+            document.getElementById('airtime-sats-display').value = totalSats.toLocaleString();
+
+            document.getElementById('airtime-kwacha-hidden').value = amountKwacha.toFixed(2);
+            document.getElementById('airtime-sats-hidden').value = totalSats;
+            document.getElementById('airtime-btc').value = amountBtc.toFixed(8);
+            document.getElementById('airtime-total').value = totalSats;
+
+            document.getElementById('airtime-calc').style.display = 'block';
         }
 
         // Handle Buy form submission
@@ -1267,6 +1373,75 @@
             }
         }
 
+        // Handle Airtime form submission
+        async function handleAirtime(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const btn = document.getElementById('airtime-btn');
+
+            const amountKwacha = parseFloat(document.getElementById('airtime-kwacha').value);
+            if (!amountKwacha || amountKwacha < 1 || amountKwacha > 100) {
+                alert('Please enter an airtime amount between 1 and 100 ZMW');
+                return;
+            }
+
+            calculateAirtime();
+
+            const data = {
+                phone: formData.get('phone') || '',
+                amount_kwacha: parseFloat(document.getElementById('airtime-kwacha-hidden').value),
+                amount_sats: parseFloat(document.getElementById('airtime-sats-hidden').value),
+                amount_btc: parseFloat(document.getElementById('airtime-btc').value),
+                total_sats: parseFloat(document.getElementById('airtime-total').value),
+            };
+
+            if (!data.phone || !data.total_sats) {
+                alert('Please fill in your phone number and a valid airtime amount.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.classList.add('btn-loading');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Generating Invoice...';
+            btn.style.pointerEvents = 'none';
+
+            try {
+                const invoiceResponse = await fetch('{{ route("generate.airtime.invoice") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await invoiceResponse.json();
+
+                btn.disabled = false;
+                btn.classList.remove('btn-loading');
+                btn.style.pointerEvents = '';
+                btn.innerHTML = originalText;
+
+                if (!invoiceResponse.ok || result.status === 'error') {
+                    showErrorModal(result.message || 'Failed to generate invoice', result.error || result.details || 'Unknown error');
+                    return;
+                }
+
+                if (result.status === 'success') {
+                    showAirtimeInvoiceModal(result);
+                }
+            } catch (error) {
+                btn.disabled = false;
+                btn.classList.remove('btn-loading');
+                btn.style.pointerEvents = '';
+                btn.innerHTML = originalText;
+                showErrorModal('Network Error', error.message || 'Failed to connect to server.');
+            }
+        }
+
         // Show error modal
         function showErrorModal(title, details) {
             const modal = document.getElementById('invoiceModal');
@@ -1318,6 +1493,40 @@
                         <i class="bi bi-info-circle"></i> This invoice expires in 10 minutes. After payment, you'll receive ${data.amount_kwacha} ZMW to your mobile money.
                     </p>
         </div>
+            `;
+
+            modal.classList.add('active');
+        }
+
+        // Show airtime invoice modal
+        function showAirtimeInvoiceModal(data) {
+            const modal = document.getElementById('invoiceModal');
+            const modalBody = document.getElementById('modalBody');
+            const phone = document.querySelector('#airtime-form [name="phone"]').value;
+
+            modalBody.innerHTML = `
+                <div class="success-icon">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <h4 style="text-align: center; margin-bottom: 1rem;">Airtime Invoice Generated!</h4>
+                <p style="text-align: center; color: var(--text-gray); margin-bottom: 1.5rem;">
+                    Scan the QR code with your Lightning wallet to pay. You'll receive ${data.amount_kwacha} ZMW airtime on ${phone}
+                </p>
+                <div class="qr-code-container">
+                    <img src="${window.location.protocol}//${window.location.host}/images/qrcodes/${data.qr_code_path}" alt="Lightning Invoice QR Code">
+                </div>
+                <div>
+                    <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Lightning Invoice:</label>
+                    <div class="invoice-address" id="invoiceAddress">${data.bolt11}</div>
+                    <button class="copy-btn" onclick="copyInvoice(this)">
+                        <i class="bi bi-clipboard"></i> Copy Invoice
+                    </button>
+                </div>
+                <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+                    <p style="font-size: 0.875rem; color: var(--text-gray); text-align: center;">
+                        <i class="bi bi-info-circle"></i> This invoice expires in 10 minutes. After payment, airtime will be sent to your phone automatically.
+                    </p>
+                </div>
             `;
 
             modal.classList.add('active');

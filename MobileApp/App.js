@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import BuyScreen from './src/screens/BuyScreen';
 import SellScreen from './src/screens/SellScreen';
+import AirtimeScreen from './src/screens/AirtimeScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -25,6 +26,8 @@ export default function App() {
               iconName = focused ? 'arrow-down-circle' : 'arrow-down-circle-outline';
             } else if (route.name === 'Sell') {
               iconName = focused ? 'arrow-up-circle' : 'arrow-up-circle-outline';
+            } else if (route.name === 'Airtime') {
+              iconName = focused ? 'phone-portrait' : 'phone-portrait-outline';
             }
 
             return <Ionicons name={iconName} size={size} color={color} />;
@@ -42,6 +45,7 @@ export default function App() {
       >
         <Tab.Screen name="Buy" component={BuyScreen} />
         <Tab.Screen name="Sell" component={SellScreen} />
+        <Tab.Screen name="Airtime" component={AirtimeScreen} options={{ title: 'Airtime' }} />
       </Tab.Navigator>
     </NavigationContainer>
   );
