@@ -1481,6 +1481,9 @@
                 <div class="qr-code-container">
                     <img src="${window.location.protocol}//${window.location.host}/images/qrcodes/${data.qr_code_path}" alt="Lightning Invoice QR Code">
         </div>
+                <a href="lightning:${encodeURIComponent(data.bolt11)}" class="btn-primary" style="display: block; text-align: center; text-decoration: none; margin-bottom: 1rem;" onclick="event.preventDefault(); openInWallet(${JSON.stringify(data.bolt11)})">
+                    <i class="bi bi-wallet2"></i> Open in Bitcoin App
+                </a>
                 <div>
                     <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Lightning Invoice:</label>
                     <div class="invoice-address" id="invoiceAddress">${data.bolt11}</div>
@@ -1496,6 +1499,7 @@
             `;
 
             modal.classList.add('active');
+            promptOpenWallet(data.bolt11);
         }
 
         // Show airtime invoice modal
@@ -1515,6 +1519,9 @@
                 <div class="qr-code-container">
                     <img src="${window.location.protocol}//${window.location.host}/images/qrcodes/${data.qr_code_path}" alt="Lightning Invoice QR Code">
                 </div>
+                <a href="lightning:${encodeURIComponent(data.bolt11)}" class="btn-primary" style="display: block; text-align: center; text-decoration: none; margin-bottom: 1rem;" onclick="event.preventDefault(); openInWallet(${JSON.stringify(data.bolt11)})">
+                    <i class="bi bi-wallet2"></i> Open in Bitcoin App
+                </a>
                 <div>
                     <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Lightning Invoice:</label>
                     <div class="invoice-address" id="invoiceAddress">${data.bolt11}</div>
@@ -1530,11 +1537,27 @@
             `;
 
             modal.classList.add('active');
+            promptOpenWallet(data.bolt11);
         }
 
         // Close modal
         function closeModal() {
             document.getElementById('invoiceModal').classList.remove('active');
+        }
+
+        function openInWallet(bolt11) {
+            if (!bolt11) return;
+            window.location.href = 'lightning:' + bolt11;
+        }
+
+        function promptOpenWallet(bolt11) {
+            if (!bolt11) return;
+
+            setTimeout(() => {
+                if (confirm('Your Lightning invoice is ready. Open it in your Bitcoin wallet app now?')) {
+                    openInWallet(bolt11);
+                }
+            }, 400);
         }
 
         // Copy invoice to clipboard

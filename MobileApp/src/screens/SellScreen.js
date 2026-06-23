@@ -141,6 +141,29 @@ export default function SellScreen() {
     }
   };
 
+  useEffect(() => {
+    if (!invoiceModal || !invoiceData?.bolt11) return;
+
+    const bolt11 = invoiceData.bolt11;
+    Alert.alert(
+      'Open Bitcoin Wallet',
+      'Your invoice is ready. Would you like to open it in your Lightning wallet app?',
+      [
+        { text: 'View QR Code', style: 'cancel' },
+        {
+          text: 'Open Wallet',
+          onPress: async () => {
+            try {
+              await Linking.openURL(`lightning:${bolt11}`);
+            } catch {
+              Alert.alert('Error', 'Could not open wallet. Please scan the QR code instead.');
+            }
+          },
+        },
+      ]
+    );
+  }, [invoiceModal, invoiceData]);
+
   const handleOpenWallet = async () => {
     if (!invoiceData?.bolt11) return;
 
@@ -278,7 +301,7 @@ export default function SellScreen() {
                   style={[styles.button, { marginTop: 0, marginBottom: 15 }]}
                   onPress={handleOpenWallet}
                 >
-                  <Text style={styles.buttonText}>Open in Wallet</Text>
+                  <Text style={styles.buttonText}>Open in Bitcoin App</Text>
                 </TouchableOpacity>
                 <Text style={styles.invoiceText} selectable>
                   {invoiceData.bolt11}
