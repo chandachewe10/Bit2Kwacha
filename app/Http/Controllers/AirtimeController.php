@@ -16,7 +16,7 @@ class AirtimeController extends Controller
         try {
             $data = $request->validate([
                 'phone' => 'required|string',
-                'amount_kwacha' => 'required|numeric|min:1|max:100',
+                'amount_kwacha' => 'required|numeric|min:5|max:100',
                 'amount_sats' => 'required|numeric|min:1',
                 'amount_btc' => 'required|numeric',
                 'total_sats' => 'required|numeric|min:1',
