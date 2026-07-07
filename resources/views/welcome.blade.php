@@ -130,47 +130,20 @@
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
         }
 
-        .play-store-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.75rem;
-            background: #000;
-            color: white;
-            text-decoration: none;
-            padding: 0.625rem 1.25rem;
-            border-radius: 0.5rem;
-            border: 2px solid rgba(255, 255, 255, 0.25);
-            transition: all 0.3s;
+        .play-store-badge {
+            display: inline-block;
+            transition: transform 0.3s, box-shadow 0.3s;
         }
 
-        .play-store-btn:hover {
-            background: #1a1a1a;
-            color: white;
+        .play-store-badge:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
         }
 
-        .play-store-icon {
-            width: 2rem;
-            height: 2rem;
-            flex-shrink: 0;
-        }
-
-        .play-store-text {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            line-height: 1.2;
-            font-size: 1.125rem;
-            font-weight: 600;
-        }
-
-        .play-store-text small {
-            font-size: 0.625rem;
-            font-weight: 400;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            opacity: 0.9;
+        .play-store-badge img {
+            height: 60px;
+            width: auto;
+            display: block;
         }
 
         /* Conversion Section */
@@ -637,20 +610,14 @@
             <h1>Instant Bitcoin ↔ Kwacha Exchange</h1>
             <p>Convert between Bitcoin and Kwacha instantly. Fast, secure, no account required.</p>
             <a href="https://play.google.com/store/apps/details?id=com.bit2kwacha.mobile"
-                class="play-store-btn"
+                class="play-store-badge"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Get it on Google Play">
-                <svg class="play-store-icon" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path fill="#EA4335" d="M325.3 234.3L104.6 13.6C94.7 3.6 80.8 0 68.6 0v512c12.2 0 26.1-3.6 36-13.6l220.7-220.7z"/>
-                    <path fill="#FBBC04" d="M325.3 277.7L104.6 498.4c9.9 10 23.8 13.6 36 13.6V277.7z"/>
-                    <path fill="#4285F4" d="M486.4 256L325.3 277.7V234.3L486.4 256z"/>
-                    <path fill="#34A853" d="M104.6 13.6l220.7 220.7L486.4 256 325.3 234.3z"/>
-                </svg>
-                <span class="play-store-text">
-                    <small>Get it on</small>
-                    Google Play
-                </span>
+                <img src="{{ asset('ui/css/assets/img/badges/get-it-on-google-play.png') }}"
+                    alt="Get it on Google Play"
+                    width="646"
+                    height="250">
             </a>
         </div>
     </section>
