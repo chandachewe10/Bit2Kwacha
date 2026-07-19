@@ -691,7 +691,7 @@
                         </div>
                         <div class="calc-row">
                             <span>Network Fee:</span>
-                            <span>5.00 ZMW</span>
+                            <span>{{ number_format(config('services.bitcoin.buy_network_fee'), 2) }} ZMW</span>
                         </div>
                         <div class="calc-row">
                             <span>Total to Pay:</span>
@@ -709,7 +709,7 @@
                     <input type="hidden" name="amount_sats" id="buy-sats">
                     <input type="hidden" name="amount_btc" id="buy-btc-hidden">
                     <input type="hidden" name="conversion_fee" id="buy-fee">
-                    <input type="hidden" name="network_fee" value="5">
+                    <input type="hidden" name="network_fee" value="{{ config('services.bitcoin.buy_network_fee') }}">
                     <input type="hidden" name="type" value="buy">
 
                     <button type="submit" class="btn-primary" id="buy-btn">
@@ -767,7 +767,7 @@
                         </div>
                         <div class="calc-row">
                             <span>Network Fee:</span>
-                            <span>400 SATS</span>
+                            <span>{{ config('services.bitcoin.sell_network_fee') }} SATS</span>
                         </div>
                         <div class="calc-row">
                             <span>Total SATS:</span>
@@ -789,7 +789,7 @@
                     <input type="hidden" name="amount_kwacha" id="sell-kwacha-hidden">
                     <input type="hidden" name="conversion_fee" id="sell-fee">
                     <input type="hidden" name="total_sats" id="sell-total">
-                    <input type="hidden" name="network_fee" value="400">
+                    <input type="hidden" name="network_fee" value="{{ config('services.bitcoin.sell_network_fee') }}">
                     <input type="hidden" name="type" value="sell">
 
                     <button type="submit" class="btn-primary" id="sell-btn">
@@ -1301,7 +1301,7 @@
                 amount_kwacha: amountKwachaValue,
                 conversion_fee: conversionFeeValue,
                 total_sats: totalSatsValue,
-                network_fee: parseFloat(formData.get('network_fee')) || 400,
+                network_fee: parseFloat(formData.get('network_fee')) || {{ config('services.bitcoin.sell_network_fee') }},
             };
 
             // Validate required fields

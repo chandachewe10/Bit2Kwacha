@@ -23,7 +23,7 @@ Route::get('/subscription/payment', function () {
             'amount_sats' => request()->input('amount_sats', 0),
             'amount_btc' => request()->input('amount_btc', 0),
             'conversion_fee' => request()->input('conversion_fee', 0),
-            'network_fee' => request()->input('network_fee', 5),
+            'network_fee' => request()->input('network_fee', config('services.bitcoin.buy_network_fee')),
             'type' => request()->input('type', 'buy'),
         ];
         session()->put('pending_transaction_data', $data);
