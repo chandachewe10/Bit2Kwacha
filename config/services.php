@@ -79,10 +79,10 @@ return [
 
     'bitcoin' => [
         'conversion_rate' => env('BITCOIN_CONVERSION_RATE', 0.023), // SAT to ZMW rate (1 SAT = 0.023 ZMW)
-        'service_fee_rate' => env('BITCOIN_SERVICE_FEE_RATE', 0.15), // 15% service fee (buy)
-        'sell_service_fee_rate' => env('BITCOIN_SELL_SERVICE_FEE_RATE', 0.15), // 15% service fee (sell)
-        'buy_network_fee' => env('BITCOIN_BUY_NETWORK_FEE', 5), // Network fee for buying (ZMW)
-        'sell_network_fee' => env('BITCOIN_SELL_NETWORK_FEE', 400), // Network fee for selling (SATS)
+        'service_fee_rate' => env('BITCOIN_SERVICE_FEE_RATE', 0.05), // 5% service fee (buy)
+        'sell_service_fee_rate' => env('BITCOIN_SELL_SERVICE_FEE_RATE', 0.05), // 5% service fee (sell)
+        'buy_network_fee' => env('BITCOIN_BUY_NETWORK_FEE', 1), // Network fee for buying (ZMW)
+        'sell_network_fee' => env('BITCOIN_SELL_NETWORK_FEE', 10), // Network fee for selling (SATS)
         // When true, front-end will use OpenNode live exchange rates; when false, it will use BITCOIN_CONVERSION_RATE only
         'use_open_node_exchange_rate' => env('USE_OPENNODE_EXCHANGE_RATE', false),
     ],

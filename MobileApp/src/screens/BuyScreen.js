@@ -18,6 +18,8 @@ export default function BuyScreen() {
   const [phone, setPhone] = useState('');
   const [amountKwacha, setAmountKwacha] = useState('');
   const [conversionRate, setConversionRate] = useState(0.023);
+  const [serviceFeeRate, setServiceFeeRate] = useState(0.05);
+  const [networkFee, setNetworkFee] = useState(1);
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('Proceed to Payment');
   const [calculations, setCalculations] = useState(null);
@@ -33,6 +35,8 @@ export default function BuyScreen() {
         // 1 SAT = btc_zmw / 100,000,000 ZMW
         setConversionRate(result.btc_zmw / 100000000);
       }
+      if (result.buy_service_fee_rate != null) setServiceFeeRate(result.buy_service_fee_rate);
+      if (result.buy_network_fee != null) setNetworkFee(result.buy_network_fee);
     } catch (error) {
       console.error('Error fetching rates:', error);
     }
@@ -44,9 +48,6 @@ export default function BuyScreen() {
       setCalculations(null);
       return;
     }
-
-    const serviceFeeRate = 0.15; // 15%
-    const networkFee = 5; // ZMW
 
     const amountSats = amount / conversionRate;
     const amountBtc = amountSats / 100000000;
@@ -63,7 +64,7 @@ export default function BuyScreen() {
 
   useEffect(() => {
     calculateBuy();
-  }, [amountKwacha, conversionRate]);
+  }, [amountKwacha, conversionRate, serviceFeeRate, networkFee]);
 
   const handleBuy = async () => {
     if (!phone || !amountKwacha || parseFloat(amountKwacha) < 20) {
@@ -115,7 +116,7 @@ export default function BuyScreen() {
         amount_sats: Math.round(calculations.amountSats).toString(),
         amount_btc: calculations.amountBtc.toString(),
         conversion_fee: calculations.conversionFee.toString(),
-        network_fee: '5',
+        network_fee: networkFee.toString(),
         total_amount: calculations.totalAmount.toString(),
         type: 'buy',
       });
@@ -187,7 +188,7 @@ export default function BuyScreen() {
             </View>
             <View style={styles.calcRow}>
               <Text style={styles.calcLabel}>Network Fee:</Text>
-              <Text style={styles.calcValue}>5.00 ZMW</Text>
+              <Text style={styles.calcValue}>{networkFee.toFixed(2)} ZMW</Text>
             </View>
             <View style={styles.calcRow}>
               <Text style={styles.calcLabel}>Total to Pay:</Text>

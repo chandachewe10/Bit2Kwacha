@@ -50,10 +50,10 @@ class PaymentController extends Controller
             $convenienceFee = $request->input('conversion_fee')
                 ?? $request->input('convenience_fee')
                 ?? $sessionData['conversion_fee']
-                ?? ($amount * config('services.bitcoin.service_fee_rate', 0.15));
+                ?? ($amount * config('services.bitcoin.service_fee_rate'));
             $networkFee = $request->input('network_fee')
                 ?? $sessionData['network_fee']
-                ?? 5; // Default network fee is 5 ZMW
+                ?? config('services.bitcoin.buy_network_fee');
 
 
             $response = Http::withHeaders([

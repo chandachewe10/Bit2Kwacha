@@ -20,6 +20,8 @@ export default function SellScreen() {
   const [phone, setPhone] = useState('');
   const [amountSats, setAmountSats] = useState('');
   const [conversionRate, setConversionRate] = useState(0.023);
+  const [serviceFeeRate, setServiceFeeRate] = useState(0.05);
+  const [networkFee, setNetworkFee] = useState(10);
   const [loading, setLoading] = useState(false);
   const [calculations, setCalculations] = useState(null);
   const [invoiceModal, setInvoiceModal] = useState(false);
@@ -35,6 +37,8 @@ export default function SellScreen() {
       if (result.status === 'success' && result.btc_zmw) {
         setConversionRate(result.btc_zmw / 100000000);
       }
+      if (result.sell_service_fee_rate != null) setServiceFeeRate(result.sell_service_fee_rate);
+      if (result.sell_network_fee != null) setNetworkFee(result.sell_network_fee);
     } catch (error) {
       console.error('Error fetching rates:', error);
     }
@@ -46,9 +50,6 @@ export default function SellScreen() {
       setCalculations(null);
       return;
     }
-
-    const serviceFeeRate = 0.15; // 15%
-    const networkFee = 400; // SATS
 
     const amountBtc = amount / 100000000;
     const conversionFee = amount * serviceFeeRate;
@@ -67,7 +68,7 @@ export default function SellScreen() {
 
   useEffect(() => {
     calculateSell();
-  }, [amountSats, conversionRate]);
+  }, [amountSats, conversionRate, serviceFeeRate, networkFee]);
 
   const handleSell = async () => {
     if (!phone || !amountSats || parseFloat(amountSats) < 500) {
@@ -112,7 +113,7 @@ export default function SellScreen() {
         amount_kwacha: calculations.receiveKwacha,
         conversion_fee: Math.round(calculations.conversionFee),
         total_sats: Math.round(calculations.totalSats),
-        network_fee: 400,
+        network_fee: networkFee,
       };
 
       const result = await exchangeService.generateInvoice(data);
@@ -235,7 +236,7 @@ export default function SellScreen() {
             </View>
             <View style={styles.calcRow}>
               <Text style={styles.calcLabel}>Network Fee:</Text>
-              <Text style={styles.calcValue}>400 SATS</Text>
+              <Text style={styles.calcValue}>{Math.round(networkFee).toLocaleString()} SATS</Text>
             </View>
             <View style={styles.calcRow}>
               <Text style={styles.calcLabel}>Total SATS:</Text>
