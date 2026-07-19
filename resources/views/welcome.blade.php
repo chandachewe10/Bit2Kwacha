@@ -739,7 +739,7 @@
                         <label class="form-label">Amount in Satoshis</label>
                         <div class="input-wrapper">
                             <input type="number" id="sell-sats" class="form-control" placeholder="Enter amount"
-                                min="200" step="1" required oninput="calculateSell()">
+                                min="500" step="1" required oninput="calculateSell()">
                             <span class="input-suffix">SATS</span>
                         </div>
                     </div>
@@ -781,7 +781,7 @@
 
                     <div class="info-badge">
                         <i class="bi bi-info-circle"></i>
-                        <span>Rate: 1 SAT = {{ config('services.bitcoin.conversion_rate') }} ZMW | Min: 200 SATS</span>
+                        <span>Rate: 1 SAT = {{ config('services.bitcoin.conversion_rate') }} ZMW | Min: 500 SATS</span>
                     </div>
 
                     <input type="hidden" name="amount_sats" id="sell-sats-hidden">
@@ -960,7 +960,7 @@
                     if (buyAmount && parseFloat(buyAmount) >= 20) {
                         calculateBuy();
                     }
-                    if (sellAmount && parseFloat(sellAmount) >= 200) {
+                    if (sellAmount && parseFloat(sellAmount) >= 500) {
                         calculateSell();
                     }
                     const airtimeAmount = document.getElementById('airtime-kwacha').value;
@@ -979,7 +979,7 @@
         // Update rate display with live rates
         function updateRateDisplay() {
             const buyRateText = `Rate: 1 ZMW = ~${(1 / liveConversionRate).toFixed(2)} SATS | Min: 20 ZMW`;
-            const sellRateText = `Rate: 1 SAT = ${liveConversionRate.toFixed(4)} ZMW | Min: 200 SATS`;
+            const sellRateText = `Rate: 1 SAT = ${liveConversionRate.toFixed(4)} ZMW | Min: 500 SATS`;
             const airtimeRateText = `Rate: 1 SAT = ${liveConversionRate.toFixed(4)} ZMW | Min: 5 ZMW | Max: 100 ZMW`;
 
             const buyInfoBadge = document.querySelector('#buy-card .info-badge span');
@@ -1096,7 +1096,7 @@
         function calculateSell() {
             const amountSats = parseFloat(document.getElementById('sell-sats').value) || 0;
 
-            if (amountSats < 200) {
+            if (amountSats < 500) {
                 document.getElementById('sell-calc').style.display = 'none';
                 return;
             }
