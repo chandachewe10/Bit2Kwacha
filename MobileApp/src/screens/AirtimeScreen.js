@@ -39,7 +39,7 @@ export default function AirtimeScreen() {
     }
   };
 
-  const AIRTIME_SERVICE_FEE_RATE = 0.001; // 0.1% service fee
+  const AIRTIME_SERVICE_FEE_RATE = 0.02; // 2% service fee
 
   const calculateAirtime = () => {
     const amount = parseFloat(amountKwacha) || 0;
@@ -191,10 +191,6 @@ export default function AirtimeScreen() {
             <View style={styles.calcRow}>
               <Text style={styles.calcLabel}>Airtime Value:</Text>
               <Text style={styles.calcValue}>{calculations.amountKwacha.toFixed(2)} ZMW</Text>
-            </View>
-            <View style={styles.calcRow}>
-              <Text style={styles.calcLabel}>Service Fee (0.1%):</Text>
-              <Text style={styles.calcValue}>{calculations.serviceFee.toLocaleString()} SATS</Text>
             </View>
             <View style={styles.calcRow}>
               <Text style={styles.calcLabel}>You'll Pay:</Text>
