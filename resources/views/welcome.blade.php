@@ -842,6 +842,10 @@
                             <span id="airtime-kwacha-display">0.00 ZMW</span>
                         </div>
                         <div class="calc-row">
+                            <span>Service Fee (0.1%):</span>
+                            <span id="airtime-service-fee-display">0 SATS</span>
+                        </div>
+                        <div class="calc-row">
                             <span>You'll Pay:</span>
                             <span id="airtime-total-display">0 SATS</span>
                         </div>
@@ -1137,17 +1141,20 @@
                 return;
             }
 
+            const serviceFeeRate = {{ config('services.bitcoin.airtime_service_fee_rate', 0.001) }};
             const conversionRate = liveConversionRate;
             const amountSats = amountKwacha / conversionRate;
-            const amountBtc = amountSats / 100000000;
-            const totalSats = Math.round(amountSats);
+            const serviceFee = amountSats * serviceFeeRate;
+            const totalSats = Math.round(amountSats + serviceFee);
+            const amountBtc = totalSats / 100000000;
 
             document.getElementById('airtime-kwacha-display').textContent = amountKwacha.toFixed(2) + ' ZMW';
+            document.getElementById('airtime-service-fee-display').textContent = Math.round(serviceFee).toLocaleString() + ' SATS';
             document.getElementById('airtime-total-display').textContent = totalSats.toLocaleString() + ' SATS';
             document.getElementById('airtime-sats-display').value = totalSats.toLocaleString();
 
             document.getElementById('airtime-kwacha-hidden').value = amountKwacha.toFixed(2);
-            document.getElementById('airtime-sats-hidden').value = totalSats;
+            document.getElementById('airtime-sats-hidden').value = Math.round(amountSats);
             document.getElementById('airtime-btc').value = amountBtc.toFixed(8);
             document.getElementById('airtime-total').value = totalSats;
 

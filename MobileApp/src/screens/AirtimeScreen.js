@@ -39,6 +39,8 @@ export default function AirtimeScreen() {
     }
   };
 
+  const AIRTIME_SERVICE_FEE_RATE = 0.001; // 0.1% service fee
+
   const calculateAirtime = () => {
     const amount = parseFloat(amountKwacha) || 0;
     if (amount < 5 || amount > 100) {
@@ -47,11 +49,13 @@ export default function AirtimeScreen() {
     }
 
     const amountSats = amount / conversionRate;
-    const amountBtc = amountSats / 100000000;
-    const totalSats = Math.round(amountSats);
+    const serviceFee = amountSats * AIRTIME_SERVICE_FEE_RATE;
+    const totalSats = Math.round(amountSats + serviceFee);
+    const amountBtc = totalSats / 100000000;
 
     setCalculations({
-      amountSats: totalSats,
+      amountSats: Math.round(amountSats),
+      serviceFee: Math.round(serviceFee),
       amountBtc,
       totalSats,
       amountKwacha: amount,
@@ -80,7 +84,7 @@ export default function AirtimeScreen() {
       const data = {
         phone,
         amount_kwacha: calculations.amountKwacha,
-        amount_sats: calculations.totalSats,
+        amount_sats: calculations.amountSats,
         amount_btc: calculations.amountBtc,
         total_sats: calculations.totalSats,
       };
@@ -187,6 +191,10 @@ export default function AirtimeScreen() {
             <View style={styles.calcRow}>
               <Text style={styles.calcLabel}>Airtime Value:</Text>
               <Text style={styles.calcValue}>{calculations.amountKwacha.toFixed(2)} ZMW</Text>
+            </View>
+            <View style={styles.calcRow}>
+              <Text style={styles.calcLabel}>Service Fee (0.1%):</Text>
+              <Text style={styles.calcValue}>{calculations.serviceFee.toLocaleString()} SATS</Text>
             </View>
             <View style={styles.calcRow}>
               <Text style={styles.calcLabel}>You'll Pay:</Text>
