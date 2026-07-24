@@ -819,7 +819,7 @@
                         <label class="form-label">Airtime Amount</label>
                         <div class="input-wrapper">
                             <input type="number" id="airtime-kwacha" class="form-control" placeholder="Enter amount"
-                                min="5" max="100" step="0.01" required oninput="calculateAirtime()">
+                                min="5" max="1000" step="0.01" required oninput="calculateAirtime()">
                             <span class="input-suffix">ZMW</span>
                         </div>
                     </div>
@@ -842,6 +842,10 @@
                             <span id="airtime-kwacha-display">0.00 ZMW</span>
                         </div>
                         <div class="calc-row">
+                            <span>Service Fee (0.1%):</span>
+                            <span id="airtime-service-fee-display">0 SATS</span>
+                        </div>
+                        <div class="calc-row">
                             <span>You'll Pay:</span>
                             <span id="airtime-total-display">0 SATS</span>
                         </div>
@@ -849,7 +853,7 @@
 
                     <div class="info-badge">
                         <i class="bi bi-info-circle"></i>
-                        <span id="airtime-rate-text">Rate: 1 SAT = {{ config('services.bitcoin.conversion_rate') }} ZMW | Min: 5 ZMW | Max: 100 ZMW</span>
+                        <span id="airtime-rate-text">Rate: 1 SAT = {{ config('services.bitcoin.conversion_rate') }} ZMW | Min: 5 ZMW | Max: 1,000 ZMW</span>
                     </div>
 
                     <input type="hidden" name="amount_kwacha" id="airtime-kwacha-hidden">
@@ -980,7 +984,7 @@
         function updateRateDisplay() {
             const buyRateText = `Rate: 1 ZMW = ~${(1 / liveConversionRate).toFixed(2)} SATS | Min: 20 ZMW`;
             const sellRateText = `Rate: 1 SAT = ${liveConversionRate.toFixed(4)} ZMW | Min: 500 SATS`;
-            const airtimeRateText = `Rate: 1 SAT = ${liveConversionRate.toFixed(4)} ZMW | Min: 5 ZMW | Max: 100 ZMW`;
+            const airtimeRateText = `Rate: 1 SAT = ${liveConversionRate.toFixed(4)} ZMW | Min: 5 ZMW | Max: 1,000 ZMW`;
 
             const buyInfoBadge = document.querySelector('#buy-card .info-badge span');
             const sellInfoBadge = document.querySelector('#sell-card .info-badge span');
@@ -1132,22 +1136,25 @@
         function calculateAirtime() {
             const amountKwacha = parseFloat(document.getElementById('airtime-kwacha').value) || 0;
 
-            if (amountKwacha < 5 || amountKwacha > 100) {
+            if (amountKwacha < 5 || amountKwacha > 1000) {
                 document.getElementById('airtime-calc').style.display = 'none';
                 return;
             }
 
+            const serviceFeeRate = {{ config('services.bitcoin.airtime_service_fee_rate', 0.001) }};
             const conversionRate = liveConversionRate;
             const amountSats = amountKwacha / conversionRate;
-            const amountBtc = amountSats / 100000000;
-            const totalSats = Math.round(amountSats);
+            const serviceFee = amountSats * serviceFeeRate;
+            const totalSats = Math.round(amountSats + serviceFee);
+            const amountBtc = totalSats / 100000000;
 
             document.getElementById('airtime-kwacha-display').textContent = amountKwacha.toFixed(2) + ' ZMW';
+            document.getElementById('airtime-service-fee-display').textContent = Math.round(serviceFee).toLocaleString() + ' SATS';
             document.getElementById('airtime-total-display').textContent = totalSats.toLocaleString() + ' SATS';
             document.getElementById('airtime-sats-display').value = totalSats.toLocaleString();
 
             document.getElementById('airtime-kwacha-hidden').value = amountKwacha.toFixed(2);
-            document.getElementById('airtime-sats-hidden').value = totalSats;
+            document.getElementById('airtime-sats-hidden').value = Math.round(amountSats);
             document.getElementById('airtime-btc').value = amountBtc.toFixed(8);
             document.getElementById('airtime-total').value = totalSats;
 
@@ -1416,8 +1423,8 @@
             const btn = document.getElementById('airtime-btn');
 
             const amountKwacha = parseFloat(document.getElementById('airtime-kwacha').value);
-            if (!amountKwacha || amountKwacha < 5 || amountKwacha > 100) {
-                alert('Please enter an airtime amount between 5 and 100 ZMW');
+            if (!amountKwacha || amountKwacha < 5 || amountKwacha > 1000) {
+                alert('Please enter an airtime amount between 5 and 1000 ZMW');
                 return;
             }
 

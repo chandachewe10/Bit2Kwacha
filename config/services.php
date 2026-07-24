@@ -83,6 +83,7 @@ return [
         'sell_service_fee_rate' => env('BITCOIN_SELL_SERVICE_FEE_RATE', 0.05), // 5% service fee (sell)
         'buy_network_fee' => env('BITCOIN_BUY_NETWORK_FEE', 1), // Network fee for buying (ZMW)
         'sell_network_fee' => env('BITCOIN_SELL_NETWORK_FEE', 10), // Network fee for selling (SATS)
+        'airtime_service_fee_rate' => env('AIRTIME_SERVICE_FEE_RATE', 0.001), // 0.1% service fee on airtime purchases
         // When true, front-end will use OpenNode live exchange rates; when false, it will use BITCOIN_CONVERSION_RATE only
         'use_open_node_exchange_rate' => env('USE_OPENNODE_EXCHANGE_RATE', false),
     ],

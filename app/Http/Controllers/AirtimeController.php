@@ -16,15 +16,16 @@ class AirtimeController extends Controller
         try {
             $data = $request->validate([
                 'phone' => 'required|string',
-                'amount_kwacha' => 'required|numeric|min:5|max:100',
+                'amount_kwacha' => 'required|numeric|min:5|max:1000',
                 'amount_sats' => 'required|numeric|min:1',
                 'amount_btc' => 'required|numeric',
                 'total_sats' => 'required|numeric|min:1',
             ]);
 
-            $data['conversion_fee'] = 0;
+            $serviceFeeRate = config('services.bitcoin.airtime_service_fee_rate', 0.001);
+            $data['conversion_fee'] = (int) round($data['amount_sats'] * $serviceFeeRate);
             $data['network_fee'] = 0;
-            $data['total_sats'] = (int) round($data['amount_sats']);
+            $data['total_sats'] = (int) round($data['amount_sats']) + $data['conversion_fee'];
 
             $apiKey = config('services.opennode.api_key');
             $callbackUrl = config('services.opennode.airtime');
