@@ -43,7 +43,7 @@ export default function AirtimeScreen() {
 
   const calculateAirtime = () => {
     const amount = parseFloat(amountKwacha) || 0;
-    if (amount < 5 || amount > 100) {
+    if (amount < 5 || amount > 1000) {
       setCalculations(null);
       return;
     }
@@ -68,8 +68,8 @@ export default function AirtimeScreen() {
 
   const handlePurchase = async () => {
     const amount = parseFloat(amountKwacha);
-    if (!phone || !amount || amount < 5 || amount > 100) {
-      Alert.alert('Validation Error', 'Please enter a valid phone number and amount between 5 and 100 ZMW');
+    if (!phone || !amount || amount < 5 || amount > 1000) {
+      Alert.alert('Validation Error', 'Please enter a valid phone number and amount between 5 and 1,000 ZMW');
       return;
     }
 
@@ -205,7 +205,7 @@ export default function AirtimeScreen() {
 
         <View style={styles.infoBadge}>
           <Text style={styles.infoText}>
-            Rate: 1 SAT = {conversionRate.toFixed(4)} ZMW | Min: 5 ZMW | Max: 100 ZMW
+            Rate: 1 SAT = {conversionRate.toFixed(4)} ZMW | Min: 5 ZMW | Max: 1,000 ZMW
           </Text>
         </View>
 
