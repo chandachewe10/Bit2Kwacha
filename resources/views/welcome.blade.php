@@ -1455,7 +1455,12 @@
                     body: JSON.stringify(data)
                 });
 
-                const result = await invoiceResponse.json();
+                let result;
+                try {
+                    result = await invoiceResponse.json();
+                } catch (_) {
+                    throw new Error('Server returned an unexpected response. Please try again.');
+                }
 
                 btn.disabled = false;
                 btn.classList.remove('btn-loading');
@@ -1553,9 +1558,7 @@
                 <p style="text-align: center; color: var(--text-gray); margin-bottom: 1.5rem;">
                     Scan the QR code with your Lightning wallet to pay. You'll receive ${data.amount_kwacha} ZMW airtime on ${phone}
                 </p>
-                <div class="qr-code-container">
-                    <img src="${window.location.protocol}//${window.location.host}/images/qrcodes/${data.qr_code_path}" alt="Lightning Invoice QR Code">
-                </div>
+                ${data.qr_code_url ? `<div class="qr-code-container"><img src="${data.qr_code_url}" alt="Lightning Invoice QR Code"></div>` : ''}
                 <a href="lightning:${encodeURIComponent(data.bolt11)}" class="btn-primary" style="display: block; text-align: center; text-decoration: none; margin-bottom: 1rem;" onclick="event.preventDefault(); openInWallet(${JSON.stringify(data.bolt11)})">
                     <i class="bi bi-wallet2"></i> Open in Bitcoin App
                 </a>

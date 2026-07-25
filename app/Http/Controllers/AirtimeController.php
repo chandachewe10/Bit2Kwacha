@@ -77,24 +77,29 @@ class AirtimeController extends Controller
                 ], 400);
             }
 
-            $logoPath = public_path('ui/css/assets/img/logo.png');
-            $processedLogoPath = $this->addRoundedCorners($logoPath);
+            $qrCodeFileName = null;
+            try {
+                $logoPath = public_path('ui/css/assets/img/logo.png');
+                $processedLogoPath = $this->addRoundedCorners($logoPath);
 
-            $qrCodeImage = QrCode::format('png')
-                ->size(400)
-                ->merge($processedLogoPath, .17, true)
-                ->generate($bolt11);
+                $qrCodeImage = QrCode::format('png')
+                    ->size(400)
+                    ->merge($processedLogoPath, .17, true)
+                    ->generate($bolt11);
 
-            $qrCodeDir = public_path('images/qrcodes');
-            if (!file_exists($qrCodeDir)) {
-                mkdir($qrCodeDir, 0755, true);
-            }
+                $qrCodeDir = public_path('images/qrcodes');
+                if (!file_exists($qrCodeDir)) {
+                    mkdir($qrCodeDir, 0755, true);
+                }
 
-            $qrCodeFileName = 'airtime_' . time() . '.png';
-            file_put_contents($qrCodeDir . '/' . $qrCodeFileName, $qrCodeImage);
+                $qrCodeFileName = 'airtime_' . time() . '.png';
+                file_put_contents($qrCodeDir . '/' . $qrCodeFileName, $qrCodeImage);
 
-            if ($processedLogoPath !== $logoPath && file_exists($processedLogoPath)) {
-                unlink($processedLogoPath);
+                if ($processedLogoPath !== $logoPath && file_exists($processedLogoPath)) {
+                    unlink($processedLogoPath);
+                }
+            } catch (\Throwable $qrEx) {
+                Log::warning('Airtime QR code generation failed (non-fatal): ' . $qrEx->getMessage());
             }
 
             AirtimePurchase::create([
@@ -117,7 +122,7 @@ class AirtimeController extends Controller
                 'status' => 'success',
                 'bolt11' => $bolt11,
                 'qr_code_path' => $qrCodeFileName,
-                'qr_code_url' => asset('images/qrcodes/' . $qrCodeFileName),
+                'qr_code_url' => $qrCodeFileName ? asset('images/qrcodes/' . $qrCodeFileName) : null,
                 'checking_id' => $checkingId,
                 'amount_kwacha' => $data['amount_kwacha'],
                 'amount_sats' => $data['amount_sats'],
@@ -130,7 +135,7 @@ class AirtimeController extends Controller
                 'message' => 'Validation failed. Please check your input.',
                 'errors' => $e->errors(),
             ], 422);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Error generating airtime invoice: ' . $e->getMessage());
 
             return response()->json([
