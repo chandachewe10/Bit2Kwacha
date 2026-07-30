@@ -407,6 +407,15 @@
             margin-top: 1rem;
         }
 
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .hero h1 {
@@ -920,6 +929,9 @@
                 <span>{{env('APP_NAME')}}</span>
             </div>
             <p>&copy; {{ date('Y') }} {{env('APP_NAME')}}. All Rights Reserved</p>
+            <p style="margin-top: 0.5rem;">
+                <a href="{{ route('terms') }}">Privacy Policy &amp; Terms</a>
+            </p>
             <p style="margin-top: 0.5rem;">Olympia, 14 Zambezi road, Lusaka, LSK 10101 | info@bit2kwacha.info</p>
         </div>
     </footer>

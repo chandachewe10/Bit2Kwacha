@@ -10,6 +10,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/privacy-terms', function () {
+    return view('terms');
+})->name('terms');
+
 Route::get('/subscription/payment', function () {
     // Check if new transaction data is provided in the request
     // This ensures that subsequent buy requests update the payment details
