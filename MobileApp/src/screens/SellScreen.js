@@ -37,8 +37,8 @@ export default function SellScreen() {
       if (result.status === 'success' && result.btc_zmw) {
         setConversionRate(result.btc_zmw / 100000000);
       }
-      if (result.sell_service_fee_rate != null) setServiceFeeRate(result.sell_service_fee_rate);
-      if (result.sell_network_fee != null) setNetworkFee(result.sell_network_fee);
+      if (result.sell_service_fee_rate != null) setServiceFeeRate(Number(result.sell_service_fee_rate));
+      if (result.sell_network_fee != null) setNetworkFee(Number(result.sell_network_fee));
     } catch (error) {
       console.error('Error fetching rates:', error);
     }

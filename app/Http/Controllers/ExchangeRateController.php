@@ -50,10 +50,10 @@ class ExchangeRateController extends Controller
                     'status' => 'success',
                     'btc_zmw' => $btcZmwRate,
                     'btc_usd' => $btcUsdRate,
-                    'buy_service_fee_rate' => config('services.bitcoin.service_fee_rate'),
-                    'sell_service_fee_rate' => config('services.bitcoin.sell_service_fee_rate'),
-                    'buy_network_fee' => config('services.bitcoin.buy_network_fee'),
-                    'sell_network_fee' => config('services.bitcoin.sell_network_fee'),
+                    'buy_service_fee_rate' => (float) config('services.bitcoin.service_fee_rate'),
+                    'sell_service_fee_rate' => (float) config('services.bitcoin.sell_service_fee_rate'),
+                    'buy_network_fee' => (float) config('services.bitcoin.buy_network_fee'),
+                    'sell_network_fee' => (float) config('services.bitcoin.sell_network_fee'),
                 ]);
             } else {
                 Log::error('OpenNode rates API error: ' . $response->body());

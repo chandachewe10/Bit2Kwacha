@@ -35,8 +35,8 @@ export default function BuyScreen() {
         // 1 SAT = btc_zmw / 100,000,000 ZMW
         setConversionRate(result.btc_zmw / 100000000);
       }
-      if (result.buy_service_fee_rate != null) setServiceFeeRate(result.buy_service_fee_rate);
-      if (result.buy_network_fee != null) setNetworkFee(result.buy_network_fee);
+      if (result.buy_service_fee_rate != null) setServiceFeeRate(Number(result.buy_service_fee_rate));
+      if (result.buy_network_fee != null) setNetworkFee(Number(result.buy_network_fee));
     } catch (error) {
       console.error('Error fetching rates:', error);
     }
