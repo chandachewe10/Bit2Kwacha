@@ -932,7 +932,7 @@
             <p style="margin-top: 0.5rem;">
                 <a href="{{ route('terms') }}">Privacy Policy &amp; Terms</a>
             </p>
-            <p style="margin-top: 0.5rem;">Olympia, 14 Zambezi road, Lusaka, LSK 10101 | info@bit2kwacha.macroit.org</p>
+            <p style="margin-top: 0.5rem;">Olympia, 14 Zambezi road, Lusaka, LSK 10101 | info@bit2kwacha.info</p>
         </div>
     </footer>
 
