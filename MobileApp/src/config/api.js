@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Update this with your Laravel API base URL
 // Production URL
-export const API_BASE_URL = "https://bit2kwacha.info";
+export const API_BASE_URL = "https://bit2kwacha.macroit.org";
 // Development URL (ngrok) - uncomment to use for local development
 // export const API_BASE_URL = 'https://5458ca2b9366.ngrok-free.app';
 
