@@ -14,14 +14,15 @@ class ZambianMobileNumber
             $digits = '0' . substr($digits, 3);
         }
 
-        if (!preg_match('/^0(?:55|56|57|75|76|77|95|96|97)\d{7}$/', $digits)) {
-            throw new InvalidArgumentException('Enter a valid 10-digit Zambian mobile number, e.g. 0561234567 or +260561234567.');
+        // Preserve the existing 07/09 ten-digit validation and add the newly allocated 055/056/057 ranges.
+        if (!preg_match('/^(?:0[79]\d{8}|0(?:55|56|57)\d{7})$/', $digits)) {
+            throw new InvalidArgumentException('Enter a valid 10-digit Zambian mobile number, e.g. 0961111111 or 0561234567.');
         }
 
         return $digits;
     }
 
-    /** Infer the Lenco operator from an allocated Zambian mobile prefix. */
+    /** Infer the Lenco operator from a known Zambian mobile prefix. */
     public static function operator(string $phone): string
     {
         $prefix = substr(self::normalize($phone), 0, 3);
@@ -37,6 +38,6 @@ class ZambianMobileNumber
             }
         }
 
-        throw new InvalidArgumentException('We could not identify the mobile network for this number.');
+        throw new InvalidArgumentException('We could not identify the mobile network for this number. Please check the number or contact support.');
     }
 }
