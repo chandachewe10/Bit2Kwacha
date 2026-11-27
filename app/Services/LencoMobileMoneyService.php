@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use InvalidArgumentException;
 use RuntimeException;
 
 class LencoMobileMoneyService
@@ -16,7 +17,7 @@ class LencoMobileMoneyService
         $operator = strtolower($operator ?: ZambianMobileNumber::operator($phone));
 
         if (!in_array($operator, ['mtn', 'airtel', 'zamtel'], true)) {
-            throw new \\InvalidArgumentException('Choose a supported Zambian mobile-money operator.');
+            throw new InvalidArgumentException('Choose a supported Zambian mobile-money operator.');
         }
 
         $token = config('services.lenco.token');
@@ -37,7 +38,9 @@ class LencoMobileMoneyService
 
         $payload = $response->json();
         $apiMessage = is_array($payload) ? (string) ($payload['message'] ?? '') : '';
-        if ($response->status() === 404 || preg_match('/not\\s+found|not\\s+registered|no\\s+account/i', $apiMessage)) {
+        $isNotRegistered = static fn (string $message): bool => (bool) preg_match('/not\s+found|not\s+registered|no\s+account/i', $message);
+
+        if ($response->status() === 404 || $isNotRegistered($apiMessage)) {
             throw new RuntimeException(self::UNREGISTERED_MESSAGE);
         }
 
@@ -46,9 +49,6 @@ class LencoMobileMoneyService
         }
 
         if (!is_array($payload) || !($payload['status'] ?? false)) {
-            if (is_array($payload) && preg_match('/not\\s+found|not\\s+registered|no\\s+account/i', $apiMessage)) {
-                throw new RuntimeException(self::UNREGISTERED_MESSAGE);
-            }
             throw new RuntimeException(self::UNREGISTERED_MESSAGE);
         }
 

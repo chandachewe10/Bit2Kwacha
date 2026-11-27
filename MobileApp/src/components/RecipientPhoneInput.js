@@ -47,7 +47,7 @@ export default function RecipientPhoneInput({ value, onChangeText, onVerified, l
       } catch (error) {
         if (cancelled) return;
         const apiMessage = error.response?.data?.message || '';
-        const isUnregistered = error.response?.status === 404 || /not\\s+registered|not\\s+found|no\\s+account/i.test(apiMessage);
+        const isUnregistered = error.response?.status === 404 || /not\s+registered|not\s+found|no\s+account/i.test(apiMessage);
         setLookup({
           status: 'error',
           name: '',
