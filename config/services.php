@@ -1,40 +1,19 @@
 <?php
 
 return [
-
-    /*
-    |--------------------------------------------------------------------------
-    | Third Party Services
-    |--------------------------------------------------------------------------
-    |
-    | This file is for storing the credentials for third party services such
-    | as Mailgun, Postmark, AWS and more. This file provides the de facto
-    | location for this type of information, allowing packages to have
-    | a conventional file to locate the various service credentials.
-    |
-    */
-
-    'postmark' => [
-        'token' => env('POSTMARK_TOKEN'),
-    ],
-
-    'resend' => [
-        'key' => env('RESEND_KEY'),
-    ],
-
+    'postmark' => ['token' => env('POSTMARK_TOKEN')],
+    'resend' => ['key' => env('RESEND_KEY')],
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
-
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
-
     'opennode' => [
         'api_key' => env('OPENNODE_API_KEY'),
         'api_key_withdrawal' => env('OPENNODE_WITHDRAWAL_API_KEY'),
@@ -56,36 +35,30 @@ return [
                 : null
         ),
     ],
-
     'africastalking' => [
         'username' => env('AT_USERNAME'),
         'api_key' => env('AT_API_KEY'),
         'base_uri' => env('AT_BASE_URI', 'https://api.africastalking.com/version1'),
     ],
-
     'lenco' => [
         'token' => env('LENCO_TOKEN'),
-        'base_uri' => env('LENCO_BASE_URI'),
+        'base_uri' => env('LENCO_BASE_URI', 'https://api.lenco.co/access/v2'),
         'wallet_uuid' => env('LENCO_WALLET_UUID'),
-
+        'public_key' => env('LENCO_PUBLIC_KEY'),
     ],
-
     'whatsapp' => [
-        'version' => env('WHATSAPP_VERSION', 'v19.0'), // WhatsApp Business API version
-        'business_phone_number_id' => env('WHATSAPP_BUSINESS_PHONE_NUMBER_ID'), // Your WhatsApp Business Phone Number ID
-        'token' => env('WHATSAPP_TOKEN'), // WhatsApp Business API Access Token
-        'base_uri' => env('WHATSAPP_BASE_URI', 'https://graph.facebook.com'), // WhatsApp Business API base URL
+        'version' => env('WHATSAPP_VERSION', 'v19.0'),
+        'business_phone_number_id' => env('WHATSAPP_BUSINESS_PHONE_NUMBER_ID'),
+        'token' => env('WHATSAPP_TOKEN'),
+        'base_uri' => env('WHATSAPP_BASE_URI', 'https://graph.facebook.com'),
     ],
-
     'bitcoin' => [
-        'conversion_rate' => env('BITCOIN_CONVERSION_RATE', 0.023), // SAT to ZMW rate (1 SAT = 0.023 ZMW)
-        'service_fee_rate' => env('BITCOIN_SERVICE_FEE_RATE', 0.05), // 5% service fee (buy)
-        'sell_service_fee_rate' => env('BITCOIN_SELL_SERVICE_FEE_RATE', 0.05), // 5% service fee (sell)
-        'buy_network_fee' => env('BITCOIN_BUY_NETWORK_FEE', 1), // Network fee for buying (ZMW)
-        'sell_network_fee' => env('BITCOIN_SELL_NETWORK_FEE', 10), // Network fee for selling (SATS)
-        'airtime_service_fee_rate' => env('AIRTIME_SERVICE_FEE_RATE', 0.02), // 2% service fee on airtime purchases
-        // When true, front-end will use OpenNode live exchange rates; when false, it will use BITCOIN_CONVERSION_RATE only
+        'conversion_rate' => env('BITCOIN_CONVERSION_RATE', 0.023),
+        'service_fee_rate' => env('BITCOIN_SERVICE_FEE_RATE', 0.05),
+        'sell_service_fee_rate' => env('BITCOIN_SELL_SERVICE_FEE_RATE', 0.05),
+        'buy_network_fee' => env('BITCOIN_BUY_NETWORK_FEE', 1),
+        'sell_network_fee' => env('BITCOIN_SELL_NETWORK_FEE', 10),
+        'airtime_service_fee_rate' => env('AIRTIME_SERVICE_FEE_RATE', 0.02),
         'use_open_node_exchange_rate' => env('USE_OPENNODE_EXCHANGE_RATE', false),
     ],
-
 ];

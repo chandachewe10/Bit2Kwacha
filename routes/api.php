@@ -5,10 +5,12 @@ use App\Http\Controllers\API\OPENNODE\ConfirmBitCoinToAirtimeController;
 use App\Http\Controllers\API\OPENNODE\ConfirmBitCoinToBankController;
 use App\Http\Controllers\API\OPENNODE\ConfirmBitCoinToMobileController;
 use App\Http\Controllers\Lenco\ConfirmMobileToBitcoinController;
+use App\Http\Controllers\Lenco\MobileMoneyController;
 use App\Http\Controllers\ExchangeRateController;
 use App\Http\Controllers\SellBitcoinController;
 use App\Http\Controllers\AirtimeController;
 use App\Http\Controllers\Lenco\PaymentController;
+use App\Http\Middleware\ResolveZambianMobileMoneyRecipient;
 
 // Webhook routes (OpenNode callbacks)
 Route::post('/confirm-bitcoin-to-bank', [ConfirmBitCoinToBankController::class, 'confirmBitCoinToBankPayments']);
@@ -20,7 +22,12 @@ Route::post('/confirm-mobile-to-bitcoin', [ConfirmMobileToBitcoinController::cla
 Route::get('/exchange-rates', [ExchangeRateController::class, 'getRates'])->name('api.exchange.rates');
 Route::post('/check-balance', [ExchangeRateController::class, 'checkBalance'])->name('api.check.balance');
 Route::get('/get-balance', [ExchangeRateController::class, 'getBalance'])->name('api.get.balance');
+Route::post('/resolve-mobile-money', [MobileMoneyController::class, 'resolve'])
+    ->middleware('throttle:10,1')
+    ->name('api.resolve.mobile.money');
 Route::post('/check-lenco-balance', [SellBitcoinController::class, 'checkFloat'])->name('api.check.lenco.balance');
-Route::post('/generate-invoice', [SellBitcoinController::class, 'generateInvoice'])->name('api.generate.invoice');
+Route::post('/generate-invoice', [SellBitcoinController::class, 'generateInvoice'])
+    ->middleware(ResolveZambianMobileMoneyRecipient::class)
+    ->name('api.generate.invoice');
 Route::post('/generate-airtime-invoice', [AirtimeController::class, 'generateInvoice'])->name('api.generate.airtime.invoice');
 Route::post('/complete-subscription', [PaymentController::class, 'completeSubscription'])->name('api.complete.subscription');
