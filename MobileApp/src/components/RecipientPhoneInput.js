@@ -5,6 +5,8 @@ import { theme } from '../config/theme';
 import { normalizeZambianPhone } from '../utils/zambianPhone';
 import { resolveMobileMoneyOperator } from '../utils/mobileMoneyOperator';
 
+const UNREGISTERED_MESSAGE = 'Number not registered for mobile money.';
+
 /** Phone field that validates and resolves the mobile-money account as the user types. */
 export default function RecipientPhoneInput({ value, onChangeText, onVerified, label = 'Mobile Money Number' }) {
   const [lookup, setLookup] = useState({ status: 'idle', name: '', operator: '', message: '' });
@@ -30,6 +32,11 @@ export default function RecipientPhoneInput({ value, onChangeText, onVerified, l
       try {
         const recipient = await exchangeService.resolveMobileMoney(normalized);
         if (cancelled) return;
+        if (!recipient?.account_name) {
+          setLookup({ status: 'error', name: '', operator, message: UNREGISTERED_MESSAGE });
+          callbacks.current.onVerified?.(null);
+          return;
+        }
         const resolved = {
           phone: recipient.phone || normalized,
           account_name: recipient.account_name,
@@ -39,11 +46,13 @@ export default function RecipientPhoneInput({ value, onChangeText, onVerified, l
         callbacks.current.onVerified?.(resolved);
       } catch (error) {
         if (cancelled) return;
+        const apiMessage = error.response?.data?.message || '';
+        const isUnregistered = error.response?.status === 404 || /not\\s+registered|not\\s+found|no\\s+account/i.test(apiMessage);
         setLookup({
           status: 'error',
           name: '',
           operator,
-          message: error.response?.data?.message || 'Could not verify this number. Check it and try again.',
+          message: isUnregistered ? UNREGISTERED_MESSAGE : (apiMessage || 'Could not verify this number. Check it and try again.'),
         });
         callbacks.current.onVerified?.(null);
       }
